@@ -11,6 +11,6 @@ for build_type in Debug Release; do
 		-b missing \
 		-pr:b default \
 		-of id/cmake \
-		-s build_type=Debug \
+		-s build_type=${build_type} \
 		-s compiler.cppstd=${cppstd}
 done
