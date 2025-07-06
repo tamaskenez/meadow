@@ -14,6 +14,12 @@ if(PROJECT_IS_TOP_LEVEL)
     if (BUILD_TESTING)
         enable_testing()
     endif()
+
+    set(CMAKE_COMPILE_WARNING_AS_ERROR ON)
+
+    include(${CMAKE_SOURCE_DIR}/cmake/warnings_clang.cmake)
+    include(${CMAKE_SOURCE_DIR}/cmake/warnings_gcc.cmake)
+    include(${CMAKE_SOURCE_DIR}/cmake/warnings_msvc.cmake)
 endif()
 
 if (BUILD_TESTING)
