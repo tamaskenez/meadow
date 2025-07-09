@@ -119,17 +119,19 @@ decltype(auto) MUST_MOVE(T&& t)
     return std::move(t);
 }
 
-namespace detail{
+namespace detail
+{
 template<class R, class T>
-requires std::integral<R> && std::floating_point<T>
+    requires std::integral<R> && std::floating_point<T>
 R float_to_int_cast_core(T fx)
 {
-    assert(!std::isnan(fx)&&
-           static_cast<T>(std::numeric_limits<R>::lowest()) <= fx && fx <= static_cast<T>(std::numeric_limits<R>::max())
-           );
+    assert(
+      !std::isnan(fx) && static_cast<T>(std::numeric_limits<R>::lowest()) <= fx
+      && fx <= static_cast<T>(std::numeric_limits<R>::max())
+    );
     return static_cast<R>(fx);
 }
-}
+} // namespace detail
 
 template<class R, class T>
     requires std::integral<R> && std::floating_point<T>
@@ -153,35 +155,40 @@ R iceil(T x)
 }
 
 template<class To, class From>
-requires std::integral<To> && std::integral<From>
-To iicast(From f){
+    requires std::integral<To> && std::integral<From>
+To iicast(From f)
+{
     assert(std::in_range<To>(f));
     return static_cast<To>(f);
 }
 
 template<class To, class From>
-requires std::floating_point<To> && std::floating_point<From>
-To ffcast(From f){
+    requires std::floating_point<To> && std::floating_point<From>
+To ffcast(From f)
+{
     return static_cast<To>(f);
 }
 
 template<class To, class From>
-requires std::floating_point<To> && std::integral<From>
-To ifcast(From f){
+    requires std::floating_point<To> && std::integral<From>
+To ifcast(From f)
+{
     return static_cast<To>(f);
 }
 
 template<class From>
-requires std::integral<From> && std::unsigned_integral<From>
-auto uscast(From f) {
+    requires std::integral<From> && std::unsigned_integral<From>
+auto uscast(From f)
+{
     using To = typename std::make_signed<From>::type;
     assert(std::in_range<To>(f));
     return static_cast<To>(f);
 }
 
 template<class From>
-requires std::integral<From> && std::signed_integral<From>
-auto sucast(From f) {
+    requires std::integral<From> && std::signed_integral<From>
+auto sucast(From f)
+{
     using To = typename std::make_unsigned<From>::type;
     assert(std::in_range<To>(f));
     return static_cast<To>(f);
