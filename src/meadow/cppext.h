@@ -70,6 +70,7 @@ using std::shared_ptr;
 using std::span;
 using std::string;
 using std::string_view;
+using std::to_underlying;
 using std::tuple;
 using std::unexpected;
 using std::uniform_int_distribution;
@@ -81,7 +82,7 @@ using std::variant;
 using std::vector;
 using std::weak_ptr;
 
-////
+//
 
 #define BEGIN_END(X) std::begin(X), std::end(X)
 #define MOVE(X) std::move(X)

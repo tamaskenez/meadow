@@ -23,6 +23,13 @@ namespace matlab
 {
 template<class T>
     requires std::floating_point<T>
+T mag2db(T x)
+{
+    return static_cast<T>(20) * log10(x);
+}
+
+template<class T>
+    requires std::floating_point<T>
 T pow2db(T x)
 {
     return static_cast<T>(10) * log10(x);
