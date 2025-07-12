@@ -51,6 +51,7 @@ using std::any;
 using std::array;
 using std::byte;
 using std::clamp;
+using std::cmp_equal;
 using std::cmp_not_equal;
 using std::default_random_engine;
 using std::deque;
@@ -81,7 +82,6 @@ using std::unordered_set;
 using std::variant;
 using std::vector;
 using std::weak_ptr;
-
 //
 
 #define BEGIN_END(X) std::begin(X), std::end(X)
