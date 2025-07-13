@@ -43,6 +43,13 @@ T db2mag(T x)
 }
 
 template<class T>
+    requires std::floating_point<T>
+T db2pow(T x)
+{
+    return pow(static_cast<T>(10), x / 10);
+}
+
+template<class T>
     requires std::integral<T> || std::floating_point<T>
 [[nodiscard]] expected<void, string> saveAscii(const char* path, span<T> xs)
 {

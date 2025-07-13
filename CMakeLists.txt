@@ -13,6 +13,7 @@ if(PROJECT_IS_TOP_LEVEL)
     option(BUILD_TESTING "Build the testing tree." ON)
     if (BUILD_TESTING)
         enable_testing()
+        find_package(GTest REQUIRED CONFIG)
     endif()
 
     set(CMAKE_COMPILE_WARNING_AS_ERROR ON)
@@ -22,10 +23,7 @@ if(PROJECT_IS_TOP_LEVEL)
     include(${CMAKE_SOURCE_DIR}/cmake/warnings_msvc.cmake)
 endif()
 
-if (BUILD_TESTING)
-    find_package(GTest REQUIRED CONFIG)
-endif()
-
 find_package(absl REQUIRED CONFIG)
 
 add_subdirectory(src)
+add_subdirectory(testing)
