@@ -251,4 +251,19 @@ struct std::hash<std::pair<A, B>> {
         return h;
     }
 };
+
+template<class T>
+void remove_prefix(std::span<T>& s, size_t n)
+{
+    assert(n <= s.size());
+    s = span(s.begin() + uscast(n), s.end());
+}
+
+template<class T>
+void remove_postfix(std::span<T>& s, size_t n)
+{
+    assert(n <= s.size());
+    s = span(s.begin(), s.end() - uscast(n));
+}
+
 } // namespace std

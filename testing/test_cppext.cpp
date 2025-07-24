@@ -55,3 +55,36 @@ TEST(cppext, iicast)
     static_assert(std::is_same_v<decltype(iicast<uint16_t>(int8_t(0))), uint16_t>);
     EXPECT_EQ(iicast<uint8_t>(255), uint8_t(255));
 }
+
+namespace
+{
+void expect_same_span(span<int> a, span<int> b)
+{
+    EXPECT_EQ(a.size(), b.size());
+    if (!a.empty()) {
+        EXPECT_EQ(a.data(), b.data());
+    }
+}
+} // namespace
+
+TEST(cppext, remove_prefix)
+{
+    vector<int> xs = {12, 34, 54};
+    const auto s0 = span(BEGIN_END(xs));
+    for (size_t i = 0; i <= 3; ++i) {
+        auto s1 = s0;
+        remove_prefix(s1, i);
+        expect_same_span(s0.subspan(i, 3 - i), s1);
+    }
+}
+
+TEST(cppext, remove_postfix)
+{
+    vector<int> xs = {12, 34, 54};
+    const auto s0 = span(BEGIN_END(xs));
+    for (size_t i = 0; i <= 3; ++i) {
+        auto s1 = s0;
+        remove_postfix(s1, i);
+        expect_same_span(s0.subspan(0, 3 - i), s1);
+    }
+}
