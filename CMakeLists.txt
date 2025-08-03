@@ -24,6 +24,7 @@ if(PROJECT_IS_TOP_LEVEL)
 endif()
 
 find_package(absl REQUIRED CONFIG)
+find_package(Eigen3 REQUIRED CONFIG)
 
 add_subdirectory(src)
 add_subdirectory(testing)

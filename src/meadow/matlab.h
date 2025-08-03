@@ -82,4 +82,26 @@ template<class T>
     return {};
 }
 
+template<class R, class X>
+R mean(X&& xs)
+{
+    CHECK(!xs.empty());
+    return ra::fold_left(
+             std::begin(xs) + 1,
+             std::end(xs),
+             static_cast<R>(*std::begin(xs)),
+             [](R a, auto b) -> R {
+                 return a + static_cast<R>(b);
+             }
+           )
+         / std::size(xs);
+}
+
+template<class X>
+    requires std::floating_point<std::decay_t<decltype(*std::begin(std::declval<X>()))>>
+auto mean(X&& xs)
+{
+    return mean<std::decay_t<decltype(*std::begin(xs))>>(xs);
+}
+
 } // namespace matlab

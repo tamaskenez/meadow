@@ -14,7 +14,7 @@ pair<double, double> callExtremumOfParabola(initializer_list<double> xs, initial
 {
     vector<double> vxs(xs);
     vector<double> vys(ys);
-    return extremumOfParabola<double>(span(vxs.data(), vxs.size()), span(vys.data(), vys.size()));
+    return extremumOfParabola<double, double, double>(span(vxs.data(), vxs.size()), span(vys.data(), vys.size()));
 }
 
 } // namespace
@@ -42,5 +42,12 @@ TEST(math, extremumOfParabola2)
     expectDoubleEq(callExtremumOfParabola({-5, -7, -11}, {-2, -5, -3}), pair(-8.250000000000000, -5.520833333333333));
     expectDoubleEq(
       callExtremumOfParabola({-40, 121, 542}, {1000, 1234, -321}), pair(122.67289011061459, 1234.024749489852184)
+    );
+
+    expectDoubleEq(
+      callExtremumOfParabola(
+        {14, 15, 1, 3, -2, 9, 15}, {382.2619, 465.5079, -30.9207, 78.0318, -0.4457, 67.0521, 505.4352}
+      ),
+      pair(1.6925948689722556, -14.222691885565183)
     );
 }

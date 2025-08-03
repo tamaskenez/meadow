@@ -11,4 +11,5 @@ target_link_libraries(meadow PUBLIC
     absl::cleanup
     absl::log
     absl::check
+    Eigen3::Eigen
 )

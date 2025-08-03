@@ -13,5 +13,5 @@ T square(T x)
 std::pair<double, double> extremumOfParabola(double ym1, double y0, double yp1);
 
 // Fit a parabola through xs, ys and return the point where the derivative is zero.
-template<class T>
-std::pair<T, T> extremumOfParabola(span<const T> xs, span<const T> ys);
+template<class R, class X, class Y>
+std::pair<R, R> extremumOfParabola(span<const X> xs, span<const Y> ys);
