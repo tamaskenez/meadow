@@ -52,6 +52,7 @@ using std::array;
 using std::byte;
 using std::clamp;
 using std::cmp_equal;
+using std::cmp_less;
 using std::cmp_not_equal;
 using std::default_random_engine;
 using std::deque;
