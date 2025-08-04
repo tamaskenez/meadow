@@ -51,3 +51,25 @@ TEST(math, extremumOfParabola2)
       pair(1.6925948689722556, -14.222691885565183)
     );
 }
+
+TEST(math, isEven)
+{
+    EXPECT_FALSE(isEven(-3));
+    EXPECT_TRUE(isEven(-2));
+    EXPECT_FALSE(isEven(-1));
+    EXPECT_TRUE(isEven(0));
+    EXPECT_FALSE(isEven(1));
+    EXPECT_TRUE(isEven(2));
+    EXPECT_FALSE(isEven(3));
+}
+
+TEST(math, isOdd)
+{
+    EXPECT_TRUE(isOdd(-3));
+    EXPECT_FALSE(isOdd(-2));
+    EXPECT_TRUE(isOdd(-1));
+    EXPECT_FALSE(isOdd(0));
+    EXPECT_TRUE(isOdd(1));
+    EXPECT_FALSE(isOdd(2));
+    EXPECT_TRUE(isOdd(3));
+}
