@@ -104,4 +104,25 @@ auto mean(X&& xs)
     return mean<std::decay_t<decltype(*std::begin(xs))>>(xs);
 }
 
+template<class X, class V, class XQ>
+    requires std::floating_point<XQ>
+auto interp1(X&& x, V&& v, XQ&& xq) -> std::decay_t<decltype(*std::begin(v))>
+{
+    if (std::size(x) < 1) {
+        assert(false);
+        return NAN;
+    }
+    assert(std::size(x) == std::size(v));
+    auto it = ra::lower_bound(std::begin(x), std::end(x), xq);
+    if (it == std::begin(x)) {
+        return *std::begin(v);
+    }
+    if (it == std::end(x)) {
+        return *std::prev(std::end(v));
+    }
+    const auto j = sucast(it - std::begin(x));
+    assert(j >= 1);
+    const auto i = j - 1;
+    return std::lerp(v[i], v[j], (xq - x[i]) / (x[j] - x[i]));
+}
 } // namespace matlab

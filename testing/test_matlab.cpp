@@ -41,3 +41,38 @@ TEST(matlab, mean_int)
     EXPECT_DOUBLE_EQ(matlab::mean<double>(span<int>(vs.data(), 2)), 1.5);
     EXPECT_DOUBLE_EQ(matlab::mean<double>(span<const int>(vs.data(), 3)), 2.0);
 }
+
+TEST(matlab, interp1)
+{
+    {
+        vector<double> x = {7.0};
+        vector<double> y = {8.0};
+        EXPECT_DOUBLE_EQ(matlab::interp1(x, y, 6.9), 8.0);
+        EXPECT_DOUBLE_EQ(matlab::interp1(x, y, 7.0), 8.0);
+        EXPECT_DOUBLE_EQ(matlab::interp1(x, y, 7.1), 8.0);
+    }
+    {
+        vector<double> x = {7.0, 9.0};
+        vector<double> y = {8.0, 12.0};
+        EXPECT_DOUBLE_EQ(matlab::interp1(x, y, 6.9), 8.0);
+        EXPECT_DOUBLE_EQ(matlab::interp1(x, y, 7.0), 8.0);
+        EXPECT_DOUBLE_EQ(matlab::interp1(x, y, 7.5), 9.0);
+        EXPECT_DOUBLE_EQ(matlab::interp1(x, y, 8.0), 10.0);
+        EXPECT_DOUBLE_EQ(matlab::interp1(x, y, 8.5), 11.0);
+        EXPECT_DOUBLE_EQ(matlab::interp1(x, y, 9.0), 12.0);
+        EXPECT_DOUBLE_EQ(matlab::interp1(x, y, 9.1), 12.0);
+    }
+    {
+        vector<double> x = {7.0, 9.0, 10.0};
+        vector<double> y = {8.0, 12.0, 20.0};
+        EXPECT_DOUBLE_EQ(matlab::interp1(x, y, 6.9), 8.0);
+        EXPECT_DOUBLE_EQ(matlab::interp1(x, y, 7.0), 8.0);
+        EXPECT_DOUBLE_EQ(matlab::interp1(x, y, 7.5), 9.0);
+        EXPECT_DOUBLE_EQ(matlab::interp1(x, y, 8.0), 10.0);
+        EXPECT_DOUBLE_EQ(matlab::interp1(x, y, 8.5), 11.0);
+        EXPECT_DOUBLE_EQ(matlab::interp1(x, y, 9.0), 12.0);
+        EXPECT_DOUBLE_EQ(matlab::interp1(x, y, 9.5), 16.0);
+        EXPECT_DOUBLE_EQ(matlab::interp1(x, y, 10.0), 20.0);
+        EXPECT_DOUBLE_EQ(matlab::interp1(x, y, 10.1), 20.0);
+    }
+}
