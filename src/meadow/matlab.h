@@ -25,14 +25,16 @@ template<class T>
     requires std::floating_point<T>
 T mag2db(T x)
 {
-    return static_cast<T>(20) * log10(x);
+    assert(x >= 0);
+    return x == 0 ? static_cast<T>(-INFINITY) : static_cast<T>(20) * log10(x);
 }
 
 template<class T>
     requires std::floating_point<T>
 T pow2db(T x)
 {
-    return static_cast<T>(10) * log10(x);
+    assert(x >= 0);
+    return x == 0 ? static_cast<T>(-INFINITY) : static_cast<T>(10) * log10(x);
 }
 
 template<class T>
@@ -51,9 +53,9 @@ T db2pow(T x)
 
 template<class T>
     requires std::integral<T> || std::floating_point<T>
-[[nodiscard]] expected<void, string> saveAscii(const char* path, span<T> xs)
+[[nodiscard]] expected<void, string> saveAscii(const fs::path& path, span<T> xs)
 {
-    FILE* f = fopen(path, "wt");
+    FILE* f = fopen(path.c_str(), "wt");
     if (!f) {
         return unexpected(format("{} ({})", strerror(errno), strerrno_or_int(errno)));
     }

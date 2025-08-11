@@ -4,12 +4,14 @@
 
 TEST(matlab, mag2db)
 {
+    EXPECT_DOUBLE_EQ(matlab::mag2db(0.0), -INFINITY);
     EXPECT_DOUBLE_EQ(matlab::mag2db(1.0), 0.0);
     EXPECT_DOUBLE_EQ(matlab::mag2db(10.0), 20.0);
 }
 
 TEST(matlab, pow2db)
 {
+    EXPECT_DOUBLE_EQ(matlab::pow2db(0.0), -INFINITY);
     EXPECT_DOUBLE_EQ(matlab::pow2db(1.0), 0.0);
     EXPECT_DOUBLE_EQ(matlab::pow2db(10.0), 10.0);
 }

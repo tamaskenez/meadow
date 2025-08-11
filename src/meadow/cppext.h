@@ -197,6 +197,24 @@ auto sucast(From f)
     return static_cast<To>(f);
 }
 
+template<class From>
+    requires std::integral<From>
+auto scast(From f)
+{
+    using To = typename std::make_signed<From>::type;
+    assert(std::in_range<To>(f));
+    return static_cast<To>(f);
+}
+
+template<class From>
+    requires std::integral<From>
+auto ucast(From f)
+{
+    using To = typename std::make_unsigned<From>::type;
+    assert(std::in_range<To>(f));
+    return static_cast<To>(f);
+}
+
 template<class R>
 R TRY_OR_FAIL(std::expected<R, std::string> X)
 {
