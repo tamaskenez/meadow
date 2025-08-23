@@ -1,5 +1,7 @@
 #pragma once
 
+#include <concepts>
+#include <span>
 #include <utility>
 
 template<class T>
@@ -14,7 +16,7 @@ std::pair<double, double> extremumOfParabola(double ym1, double y0, double yp1);
 
 // Fit a parabola through xs, ys and return the point where the derivative is zero.
 template<class R, class X, class Y>
-std::pair<R, R> extremumOfParabola(span<const X> xs, span<const Y> ys);
+std::pair<R, R> extremumOfParabola(std::span<const X> xs, std::span<const Y> ys);
 
 template<class T>
     requires std::integral<T>

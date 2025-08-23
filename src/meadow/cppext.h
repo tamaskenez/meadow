@@ -216,6 +216,14 @@ auto ucast(From f)
     return static_cast<To>(f);
 }
 
+template<class To, class From>
+auto bitcast(const From& f)
+{
+    static_assert(!std::is_pointer_v<To> && !std::is_pointer_v<From>, "bitcast doesn't work for pointer types");
+    static_assert(sizeof(To) == sizeof(From), "bitcast converts only between types of the same size");
+    return reinterpret_cast<const To&>(f);
+}
+
 template<class R>
 R TRY_OR_FAIL(std::expected<R, std::string> X)
 {

@@ -1,9 +1,7 @@
 #pragma once
 
+#include "meadow/cppext.h"
 #include "meadow/errno.h"
-
-#include <cmath>
-#include <concepts>
 
 // Helper class, for example, to supply Eigen matrices for reading.
 template<class T>
@@ -53,7 +51,7 @@ T db2pow(T x)
 
 template<class T>
     requires std::integral<T> || std::floating_point<T>
-[[nodiscard]] expected<void, string> saveAscii(const fs::path& path, span<T> xs)
+[[nodiscard]] expected<void, string> saveAscii(const std::filesystem::path& path, std::span<T> xs)
 {
     FILE* f = fopen(path.c_str(), "wt");
     if (!f) {
