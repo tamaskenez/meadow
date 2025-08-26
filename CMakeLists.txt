@@ -24,7 +24,11 @@ if(PROJECT_IS_TOP_LEVEL)
 endif()
 
 find_package(absl REQUIRED CONFIG)
-find_package(Eigen3 REQUIRED CONFIG)
+
+option(MEADOW_NO_EIGEN "Build Eigen-dependent parts" OFF)
+if(MEADOW_NO_EIGEN)
+    find_package(Eigen3 REQUIRED CONFIG)
+endif()
 
 add_subdirectory(src)
 add_subdirectory(testing)

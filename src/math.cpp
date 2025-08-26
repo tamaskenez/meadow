@@ -2,7 +2,9 @@
 
 #include "meadow/matlab.h"
 
-#include <Eigen/Dense>
+#if MEADOW_HAS_EIGEN == 1
+  #include <Eigen/Dense>
+#endif
 
 std::pair<double, double> extremumOfParabola(double ym1, double y0, double yp1)
 {
@@ -12,6 +14,7 @@ std::pair<double, double> extremumOfParabola(double ym1, double y0, double yp1)
     return std::pair(x, (a * x + b) * x + y0);
 }
 
+#if MEADOW_HAS_EIGEN == 1
 template<class R, class X, class Y>
 std::pair<R, R> extremumOfParabola(span<const X> xs, span<const Y> ys)
 {
@@ -53,3 +56,4 @@ std::pair<R, R> extremumOfParabola(span<const X> xs, span<const Y> ys)
 template std::pair<float, float> extremumOfParabola(span<const int> xs, span<const float> ys);
 template std::pair<float, float> extremumOfParabola(span<const float> xs, span<const float> ys);
 template std::pair<double, double> extremumOfParabola(span<const double> xs, span<const double> ys);
+#endif

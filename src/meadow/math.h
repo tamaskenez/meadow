@@ -14,9 +14,11 @@ T square(T x)
 // Precond: (ym1 + yp1) / 2 - y0 != 0
 std::pair<double, double> extremumOfParabola(double ym1, double y0, double yp1);
 
+#if MEADOW_HAS_EIGEN == 1
 // Fit a parabola through xs, ys and return the point where the derivative is zero.
 template<class R, class X, class Y>
 std::pair<R, R> extremumOfParabola(std::span<const X> xs, std::span<const Y> ys);
+#endif
 
 template<class T>
     requires std::integral<T>
