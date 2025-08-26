@@ -26,7 +26,7 @@ endif()
 find_package(absl REQUIRED CONFIG)
 
 option(MEADOW_NO_EIGEN "Build Eigen-dependent parts" OFF)
-if(MEADOW_NO_EIGEN)
+if(NOT MEADOW_NO_EIGEN)
     find_package(Eigen3 REQUIRED CONFIG)
 endif()
 
