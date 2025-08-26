@@ -31,4 +31,6 @@ if(MEADOW_NO_EIGEN)
 endif()
 
 add_subdirectory(src)
-add_subdirectory(testing)
+if(BUILD_TESTING)
+    add_subdirectory(testing)
+endif()
