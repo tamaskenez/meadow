@@ -10,12 +10,14 @@ void expectDoubleEq(pair<double, double> a, pair<double, double> b)
     EXPECT_DOUBLE_EQ(a.second, b.second);
 }
 
+#if MEADOW_HAS_EIGEN == 1
 pair<double, double> callExtremumOfParabola(initializer_list<double> xs, initializer_list<double> ys)
 {
     vector<double> vxs(xs);
     vector<double> vys(ys);
     return extremumOfParabola<double, double, double>(span(vxs.data(), vxs.size()), span(vys.data(), vys.size()));
 }
+#endif
 
 } // namespace
 
@@ -29,6 +31,7 @@ TEST(math, extremumOfParabola)
     expectDoubleEq(extremumOfParabola(-5, 2, 1), pair(0.375, 2.5625));
 }
 
+#if MEADOW_HAS_EIGEN == 1
 TEST(math, extremumOfParabola2)
 {
     expectDoubleEq(callExtremumOfParabola({-1, 0, 1}, {-1, 0, -1}), pair(0.0, 0.0));
@@ -51,6 +54,7 @@ TEST(math, extremumOfParabola2)
       pair(1.6925948689722556, -14.222691885565183)
     );
 }
+#endif
 
 TEST(math, isEven)
 {
