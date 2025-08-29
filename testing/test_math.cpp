@@ -77,3 +77,53 @@ TEST(math, isOdd)
     EXPECT_FALSE(isOdd(2));
     EXPECT_TRUE(isOdd(3));
 }
+
+template<class T>
+void test_sgn_floating()
+{
+    using std::numeric_limits;
+    static_assert(std::is_same_v<std::decay_t<decltype(sgn(T(0)))>, T>);
+    EXPECT_TRUE(std::isnan(sgn(numeric_limits<T>::quiet_NaN())));
+    EXPECT_TRUE(std::isnan(sgn(numeric_limits<T>::signaling_NaN())));
+    EXPECT_EQ(sgn(-std::numeric_limits<T>::infinity()), T(-1));
+    EXPECT_EQ(sgn(T(-10)), T(-1));
+    EXPECT_EQ(sgn(-numeric_limits<T>::denorm_min()), T(-1));
+    EXPECT_EQ(sgn(T(0)), T(0));
+    EXPECT_EQ(sgn(numeric_limits<T>::denorm_min()), T(1));
+    EXPECT_EQ(sgn(T(10)), T(1));
+    EXPECT_EQ(sgn(numeric_limits<T>::infinity()), T(1));
+}
+
+TEST(math, sgn_floating)
+{
+    test_sgn_floating<float>();
+    test_sgn_floating<double>();
+}
+
+TEST(math, sgn_unsigned_integral)
+{
+    uint8_t x = 0;
+    do {
+        const auto sgn_x = sgn(x);
+        static_assert(std::is_same_v<std::decay_t<decltype(sgn_x)>, uint8_t>);
+        if (x == 0) {
+            EXPECT_EQ(sgn_x, uint8_t(0));
+        } else {
+            EXPECT_EQ(sgn_x, uint8_t(1));
+        }
+    } while (x++ != 255);
+}
+
+TEST(math, sgn_signed_integral)
+{
+    int8_t x = -128;
+    do {
+        const auto sgn_x = sgn(x);
+        static_assert(std::is_same_v<std::decay_t<decltype(sgn_x)>, int8_t>);
+        if (x == 0) {
+            EXPECT_EQ(sgn_x, int8_t(0));
+        } else {
+            EXPECT_EQ(sgn_x, int8_t(x < 0 ? -1 : 1));
+        }
+    } while (x++ != 127);
+}

@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cmath>
 #include <concepts>
 #include <span>
 #include <utility>
@@ -32,4 +33,31 @@ template<class T>
 bool isOdd(T x)
 {
     return (x & 1) == 1;
+}
+
+template<class T>
+    requires std::floating_point<T>
+T sgn(T x)
+{
+    switch (std::fpclassify(x)) {
+    case FP_NAN:
+    case FP_ZERO:
+        return x;
+    default:
+        return std::copysign(T(1), x);
+    }
+}
+
+template<class T>
+    requires std::signed_integral<T>
+T sgn(T x)
+{
+    return x > T(0) ? T(1) : x >> (sizeof(T) * 8 - 1);
+}
+
+template<class T>
+    requires std::unsigned_integral<T>
+T sgn(T x)
+{
+    return x > T(0) ? T(1) : T(0);
 }
