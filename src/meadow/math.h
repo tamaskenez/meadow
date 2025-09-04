@@ -6,7 +6,7 @@
 #include <utility>
 
 template<class T>
-T square(T x)
+constexpr T square(T x)
 {
     return x * x;
 }

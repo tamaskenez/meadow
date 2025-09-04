@@ -32,5 +32,6 @@ endif()
 
 add_subdirectory(src)
 if(BUILD_TESTING)
+    find_package(magic_enum REQUIRED CONFIG)
     add_subdirectory(testing)
 endif()
