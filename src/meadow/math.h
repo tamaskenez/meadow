@@ -44,7 +44,7 @@ T sgn(T x)
     case FP_ZERO:
         return x;
     default:
-        return std::copysign(T(1), x);
+        return std::signbit(x) ? T(-1) : T(1);
     }
 }
 
@@ -60,4 +60,22 @@ template<class T>
 T sgn(T x)
 {
     return x > T(0) ? T(1) : T(0);
+}
+
+// Negative x will be correctly handled, resulting in "modulo" not remainder. Undefined behavior if y <= 0.
+template<class T>
+    requires std::floating_point<T>
+T modulo(T x, T y)
+{
+    assert(y > 0);
+    return std::fmod(std::fmod(x, y) + y, y);
+}
+
+// Negative x will be correctly handled, resulting in "modulo" not remainder. Undefined behavior if y <= 0.
+template<class T>
+    requires std::integral<T>
+T modulo(T x, T y)
+{
+    assert(y > 0);
+    return ((x % y) + y) % y;
 }

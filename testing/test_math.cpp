@@ -127,3 +127,23 @@ TEST(math, sgn_signed_integral)
         }
     } while (x++ != 127);
 }
+
+TEST(math, modulo_floating_point)
+{
+    constexpr double M = 2.5;
+    for (int i : vi::iota(-10, 10)) {
+        EXPECT_EQ(modulo(0.0 + i * M, M), 0.0);
+        EXPECT_EQ(modulo(0.5 + i * M, M), 0.5);
+        EXPECT_EQ(modulo(2.0 + i * M, M), 2.0);
+    }
+}
+
+TEST(math, module_integral)
+{
+    constexpr int M = 25;
+    for (int i : vi::iota(-10, 10)) {
+        EXPECT_EQ(modulo(0 + i * M, M), 0);
+        EXPECT_EQ(modulo(5 + i * M, M), 5);
+        EXPECT_EQ(modulo(20 + i * M, M), 20);
+    }
+}
