@@ -50,6 +50,22 @@ T db2pow(T x)
 }
 
 template<class T>
+    requires std::floating_point<T> || std::integral<T>
+auto rad2deg(T x)
+{
+    using R = decltype(std::sin(x));
+    return x * static_cast<R>(180.0 / num::pi);
+}
+
+template<class T>
+    requires std::floating_point<T> || std::integral<T>
+auto deg2rad(T x)
+{
+    using R = decltype(std::sin(x));
+    return x * static_cast<R>(num::pi / 180.0);
+}
+
+template<class T>
     requires std::integral<T> || std::floating_point<T>
 [[nodiscard]] expected<void, string> saveAscii(const std::filesystem::path& path, std::span<T> xs)
 {

@@ -78,3 +78,20 @@ TEST(matlab, interp1)
         EXPECT_DOUBLE_EQ(matlab::interp1(x, y, 10.1), 20.0);
     }
 }
+
+TEST(matlab, deg2rad)
+{
+    EXPECT_DOUBLE_EQ(matlab::deg2rad(0.0), 0.0);
+    EXPECT_DOUBLE_EQ(matlab::deg2rad(90.0), num::pi / 2);
+    EXPECT_DOUBLE_EQ(matlab::deg2rad(-90.0), -num::pi / 2);
+    EXPECT_DOUBLE_EQ(matlab::deg2rad(0), 0.0);
+    EXPECT_DOUBLE_EQ(matlab::deg2rad(90), num::pi / 2);
+    EXPECT_DOUBLE_EQ(matlab::deg2rad(-90), -num::pi / 2);
+}
+
+TEST(matlab, rad2deg)
+{
+    EXPECT_DOUBLE_EQ(matlab::rad2deg(0.0), 0.0);
+    EXPECT_DOUBLE_EQ(matlab::rad2deg(num::pi / 2), 90);
+    EXPECT_DOUBLE_EQ(matlab::rad2deg(-num::pi / 2), -90);
+}
