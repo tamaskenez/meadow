@@ -66,7 +66,11 @@ string strerrno_or_int(int e)
         CASE(ENOTEMPTY)
         CASE(ENOTRECOVERABLE)
         CASE(ENOTSOCK)
+#ifdef __EMSCRIPTEN__
+        static_assert(ENOTSUP == EOPNOTSUPP);
+#else
         CASE(ENOTSUP)
+#endif
         CASE(ENOTTY)
         CASE(ENXIO)
         CASE(EOPNOTSUPP)
