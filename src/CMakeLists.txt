@@ -17,8 +17,14 @@ else()
     target_compile_definitions(meadow PUBLIC MEADOW_HAS_EIGEN=0)
 endif()
 
-target_link_libraries(meadow PUBLIC
-    absl::cleanup
-    absl::log
-    absl::check
-)
+if(MEADOW_NO_ABSL)
+    target_compile_definitions(meadow PUBLIC MEADOW_HAS_ABSL=0)
+else()
+    target_compile_definitions(meadow PUBLIC MEADOW_HAS_ABSL=1)
+    target_link_libraries(meadow PUBLIC
+        absl::cleanup
+        absl::log
+        absl::check
+    )
+endif()
+

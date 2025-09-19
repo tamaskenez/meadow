@@ -1,8 +1,10 @@
 #pragma once
 
-#include <absl/cleanup/cleanup.h>
-#include <absl/log/check.h>
-#include <absl/log/log.h>
+#if MEADOW_HAS_ABSL == 1
+  #include <absl/cleanup/cleanup.h>
+  #include <absl/log/check.h>
+  #include <absl/log/log.h>
+#endif
 
 #include <algorithm>
 #include <any>
@@ -27,6 +29,7 @@
 #include <random>
 #include <ranges>
 #include <set>
+#include <source_location>
 #include <span>
 #include <string>
 #include <string_view>
@@ -47,6 +50,7 @@ namespace ra = std::ranges;
 namespace this_thread = std::this_thread;
 namespace vi = std::ranges::views;
 
+#ifndef MEADOW_NO_USING_STD
 using std::any;
 using std::array;
 using std::byte;
@@ -85,7 +89,7 @@ using std::unordered_set;
 using std::variant;
 using std::vector;
 using std::weak_ptr;
-//
+#endif
 
 #define BEGIN_END(X) std::begin(X), std::end(X)
 #define MOVE(X) std::move(X)
@@ -99,6 +103,22 @@ inline void __inline_void_function_with_empty_body__() {}
 #define PP_CONCAT(A, B) PP_CONCAT2(A, B)
 
 #define HOLDS(VARIANT, ALTERNATIVE) std::holds_alternative<ALTERNATIVE>(VARIANT)
+
+#if MEADOW_HAS_ABSL == 0
+[[noreturn]] void meadow_check_failed_handler(
+  const char* condition, const std::source_location location = std::source_location::current()
+);
+  #ifdef NDEBUG
+    #define CHECK(COND)                             \
+        do {                                        \
+            if (!(COND)) {                          \
+                meadow_check_failed_handler(#COND); \
+            }                                       \
+        } while (0)
+  #else
+    #define CHECK(COND) assert(COND)
+  #endif
+#endif
 
 // switch_variant from https://en.cppreference.com/w/cpp/utility/variant/visit
 template<class... Ts>
@@ -224,6 +244,7 @@ auto bitcast(const From& f)
     return reinterpret_cast<const To&>(f);
 }
 
+#if MEADOW_HAS_ABSL == 1
 template<class R>
 R TRY_OR_FAIL(std::expected<R, std::string> X)
 {
@@ -236,6 +257,7 @@ inline void TRY_OR_FAIL(std::expected<void, std::string> X)
 {
     LOG_IF(FATAL, !X) << X.error();
 }
+#endif
 
 // Hash
 
