@@ -7,14 +7,14 @@
 template<class T>
 struct MatrixReader {
 public:
-    MatrixReader(size_t rowsArg, size_t colsArg, function<T(size_t r, size_t c)> atFnArg)
+    MatrixReader(size_t rowsArg, size_t colsArg, std::function<T(size_t r, size_t c)> atFnArg)
         : rows(rowsArg)
         , cols(colsArg)
         , atFn(MOVE(atFnArg))
     {
     }
     size_t rows, cols;
-    function<T(size_t r, size_t c)> atFn;
+    std::function<T(size_t r, size_t c)> atFn;
 };
 
 namespace matlab
@@ -67,11 +67,11 @@ auto deg2rad(T x)
 
 template<class T>
     requires std::integral<T> || std::floating_point<T>
-[[nodiscard]] expected<void, string> saveAscii(const std::filesystem::path& path, std::span<T> xs)
+[[nodiscard]] std::expected<void, std::string> saveAscii(const std::filesystem::path& path, std::span<T> xs)
 {
     FILE* f = fopen(path.c_str(), "wt");
     if (!f) {
-        return unexpected(format("{} ({})", strerror(errno), strerrno_or_int(errno)));
+        return std::unexpected(format("{} ({})", strerror(errno), strerrno_or_int(errno)));
     }
     for (auto x : xs) {
         std::println(f, "{}", x);
@@ -82,11 +82,11 @@ template<class T>
 
 template<class T>
     requires std::integral<T> || std::floating_point<T>
-[[nodiscard]] expected<void, string> saveAscii(const char* path, const MatrixReader<T>& mr)
+[[nodiscard]] std::expected<void, std::string> saveAscii(const char* path, const MatrixReader<T>& mr)
 {
     FILE* f = fopen(path, "wt");
     if (!f) {
-        return unexpected(format("{} ({})", strerror(errno), strerrno_or_int(errno)));
+        return std::unexpected(format("{} ({})", strerror(errno), strerrno_or_int(errno)));
     }
     for (size_t r = 0; r < mr.rows; ++r) {
         for (size_t c = 0; c < mr.cols; ++c) {
