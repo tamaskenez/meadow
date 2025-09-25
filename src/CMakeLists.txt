@@ -1,30 +1,4 @@
-file(GLOB_RECURSE sources CONFIGURE_DEPENDS *.h *.cpp)
-source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${sources})
-add_library(meadow STATIC ${sources})
-target_precompile_headers(meadow
-    PRIVATE pch.h
-)
-target_include_directories(meadow
-    PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
-)
-
-if(TARGET Eigen3::Eigen)
-    target_link_libraries(meadow PRIVATE
-        Eigen3::Eigen
-    )
-    target_compile_definitions(meadow PUBLIC MEADOW_HAS_EIGEN=1)
-else()
-    target_compile_definitions(meadow PUBLIC MEADOW_HAS_EIGEN=0)
+add_subdirectory(meadow)
+if(NOT MEADOW_NO_SDL)
+    add_subdirectory(sdl_app)
 endif()
-
-if(MEADOW_NO_ABSL)
-    target_compile_definitions(meadow PUBLIC MEADOW_HAS_ABSL=0)
-else()
-    target_compile_definitions(meadow PUBLIC MEADOW_HAS_ABSL=1)
-    target_link_libraries(meadow PUBLIC
-        absl::cleanup
-        absl::log
-        absl::check
-    )
-endif()
-

@@ -33,6 +33,11 @@ if(NOT MEADOW_NO_EIGEN)
     find_package(Eigen3 REQUIRED CONFIG)
 endif()
 
+option(MEADOW_NO_SDL "Build without SDL-dependent parts" OFF)
+if(NOT MEADOW_NO_SDL)
+    find_package(SDL3 REQUIRED CONFIG)
+endif()
+
 add_subdirectory(src)
 if(BUILD_TESTING)
     find_package(magic_enum REQUIRED CONFIG)

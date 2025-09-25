@@ -1,0 +1,42 @@
+file(GLOB_RECURSE sources CONFIGURE_DEPENDS *.h *.cpp)
+source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${sources})
+
+if(MEADOW_NO_SDL)
+    list(FILTER sources EXCLUDE REGEX "^sdl\\.*$")
+endif()
+
+add_library(meadow STATIC ${sources})
+add_library(meadow::meadow ALIAS meadow)
+
+target_precompile_headers(meadow
+    PRIVATE pch.h
+)
+target_include_directories(meadow
+    PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>/include
+)
+
+if(TARGET Eigen3::Eigen)
+    target_link_libraries(meadow PRIVATE
+        Eigen3::Eigen
+    )
+    target_compile_definitions(meadow PUBLIC MEADOW_HAS_EIGEN=1)
+else()
+    target_compile_definitions(meadow PUBLIC MEADOW_HAS_EIGEN=0)
+endif()
+
+if(MEADOW_NO_ABSL)
+    target_compile_definitions(meadow PUBLIC MEADOW_HAS_ABSL=0)
+else()
+    target_compile_definitions(meadow PUBLIC MEADOW_HAS_ABSL=1)
+    target_link_libraries(meadow PUBLIC
+        absl::cleanup
+        absl::log
+        absl::check
+    )
+endif()
+
+if(NOT MEADOW_NO_SDL)
+    target_link_libraries(meadow PUBLIC
+        SDL3::SDL3
+    )
+endif()
