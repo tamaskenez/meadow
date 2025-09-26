@@ -45,3 +45,31 @@ const SDL_UserEvent* sdl_user_event_cast(const SDL_Event* event, uint32_t user_e
 {
     return event->type == user_event_type ? reinterpret_cast<const SDL_UserEvent*>(event) : nullptr;
 }
+
+#if MEADOW_HAS_SDL_MIXER == 1
+// Return the file extensions (without the dot) which the currently enabled MIX decoders support.
+// Call MIX_Init() before calling this function.
+vector<string> get_extensions_for_mix_decoders()
+{
+    vector<string> result;
+
+    const static unordered_map<string, vector<string>> k_extensions_for_decoders = {
+      {"WAV",       {"wav"} },
+      {"STBVORBIS", {"ogg"} },
+      {"DRFLAC",    {"flac"}},
+      {"VOC",       {"voc"} },
+      {"AIFF",      {"aiff"}},
+      {"AU",        {"au"}  },
+      {"DRMP3",     {"mp3"} }
+    };
+
+    for (int i : vi::iota(0, CHECK_SDL(MIX_GetNumAudioDecoders()))) {
+        auto it = k_extensions_for_decoders.find(CHECK_SDL(MIX_GetAudioDecoder(i)));
+        if (it != k_extensions_for_decoders.end()) {
+            result.append_range(it->second);
+        }
+    }
+
+    return result;
+}
+#endif

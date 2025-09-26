@@ -2,6 +2,7 @@
 
 #pragma once
 
+#include <SDL3/SDL_audio.h>
 #include <SDL3/SDL_gpu.h>
 #include <SDL3/SDL_pixels.h>
 #include <SDL3/SDL_render.h>
@@ -47,10 +48,12 @@ DEFINE_SDL_UNIQUE_PTR(SDL_Texture, SDL_DestroyTexture)
 DEFINE_SDL_UNIQUE_PTR(SDL_Surface, SDL_DestroySurface)
 DEFINE_SDL_UNIQUE_PTR(SDL_Palette, SDL_DestroyPalette)
 DEFINE_SDL_UNIQUE_PTR(SDL_GPUDevice, SDL_DestroyGPUDevice)
+DEFINE_SDL_UNIQUE_PTR(SDL_AudioStream, SDL_DestroyAudioStream)
 
 #if MEADOW_HAS_SDL_MIXER == 1
 DEFINE_SDL_UNIQUE_PTR(MIX_Mixer, MIX_DestroyMixer)
 DEFINE_SDL_UNIQUE_PTR(MIX_Audio, MIX_DestroyAudio)
+DEFINE_SDL_UNIQUE_PTR(MIX_AudioDecoder, MIX_DestroyAudioDecoder)
 #endif
 
 #undef DEFINE_SDL_UNIQUE_PTR
@@ -101,3 +104,9 @@ void push_sdl_user_event_any(T&& payload)
     detail::push_sdl_user_event_any(new std::any(std::forward<T>(payload)));
 }
 uint32_t get_user_event_type_any();
+
+#if MEADOW_HAS_SDL_MIXER == 1
+// Return the file extensions (without the dot) which the currently enabled MIX decoders support.
+// Call MIX_Init() before calling this function.
+vector<string> get_extensions_for_mix_decoders();
+#endif
