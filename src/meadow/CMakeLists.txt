@@ -1,7 +1,7 @@
 file(GLOB_RECURSE sources CONFIGURE_DEPENDS *.h *.cpp)
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${sources})
 
-if(MEADOW_NO_SDL)
+if(NOT MEADOW_HAS_SDL)
     list(FILTER sources EXCLUDE REGEX "^sdl\\.*$")
 endif()
 
@@ -15,19 +15,13 @@ target_include_directories(meadow
     PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>/include
 )
 
-if(TARGET Eigen3::Eigen)
+if(MEADOW_HAS_EIGEN)
     target_link_libraries(meadow PRIVATE
         Eigen3::Eigen
     )
-    target_compile_definitions(meadow PUBLIC MEADOW_HAS_EIGEN=1)
-else()
-    target_compile_definitions(meadow PUBLIC MEADOW_HAS_EIGEN=0)
 endif()
 
-if(MEADOW_NO_ABSL)
-    target_compile_definitions(meadow PUBLIC MEADOW_HAS_ABSL=0)
-else()
-    target_compile_definitions(meadow PUBLIC MEADOW_HAS_ABSL=1)
+if(MEADOW_HAS_ABSL)
     target_link_libraries(meadow PUBLIC
         absl::cleanup
         absl::log
@@ -35,8 +29,18 @@ else()
     )
 endif()
 
-if(NOT MEADOW_NO_SDL)
+if(MEADOW_HAS_SDL)
     target_link_libraries(meadow PUBLIC
         SDL3::SDL3
     )
+    get_target_property(sdl_include_dirs SDL3::Headers INTERFACE_INCLUDE_DIRECTORIES)
+    target_include_directories(meadow SYSTEM PRIVATE ${sdl_include_dirs})
 endif()
+
+foreach(dependency IN LISTS dependencies)
+    if(MEADOW_HAS_${dependency})
+        target_compile_definitions(meadow PUBLIC MEADOW_HAS_${dependency}=1)
+    else()
+        target_compile_definitions(meadow PUBLIC MEADOW_HAS_${dependency}=0)
+    endif()
+endforeach()

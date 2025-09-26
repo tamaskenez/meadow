@@ -7,6 +7,10 @@
 #include <SDL3/SDL_render.h>
 #include <SDL3/SDL_video.h>
 
+#if MEADOW_HAS_SDL_MIXER == 1
+  #include <SDL3_mixer/SDL_mixer.h>
+#endif
+
 #include <memory>
 #include <source_location>
 #include <type_traits>
@@ -44,6 +48,11 @@ DEFINE_SDL_UNIQUE_PTR(SDL_Surface, SDL_DestroySurface)
 DEFINE_SDL_UNIQUE_PTR(SDL_Palette, SDL_DestroyPalette)
 DEFINE_SDL_UNIQUE_PTR(SDL_GPUDevice, SDL_DestroyGPUDevice)
 
+#if MEADOW_HAS_SDL_MIXER == 1
+DEFINE_SDL_UNIQUE_PTR(MIX_Mixer, MIX_DestroyMixer)
+DEFINE_SDL_UNIQUE_PTR(MIX_Audio, MIX_DestroyAudio)
+#endif
+
 #undef DEFINE_SDL_UNIQUE_PTR
 
 namespace detail
@@ -76,3 +85,19 @@ T check_sdl(T result, bool terminate_on_error, const std::source_location locati
 
 #define CHECK_SDL(X) check_sdl(X, true)
 #define EXPECT_SDL(X) check_sdl(X, false)
+
+const SDL_UserEvent* sdl_user_event_cast(const SDL_Event* event, uint32_t user_event_type);
+
+// Call SDL_PushEvent with SDL_UserEvent by moving `event` onto the heap and SDL_UserEvent::data1 contains the pointer
+// to that.
+namespace detail
+{
+void push_sdl_user_event_any(std::any* event); // Takes ownership.
+}
+template<class T>
+    requires(!std::is_same_v<std::decay_t<T>, std::any*>)
+void push_sdl_user_event_any(T&& payload)
+{
+    detail::push_sdl_user_event_any(new std::any(std::forward<T>(payload)));
+}
+uint32_t get_user_event_type_any();
