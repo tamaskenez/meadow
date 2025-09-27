@@ -32,12 +32,14 @@ set(dependencies
     EIGEN
     SDL
     SDL_MIXER
+    BOOST
 )
 
 set(ABSL_PACKAGE_NAME absl)
 set(EIGEN_PACKAGE_NAME Eigen3)
 set(SDL_PACKAGE_NAME SDL3)
 set(SDL_MIXER_PACKAGE_NAME SDL3_mixer)
+set(BOOST_PACKAGE_NAME Boost)
 
 foreach(dependency IN LISTS dependencies)
     set(MEADOW_WITH_${dependency} ${dependency_default_requirement} CACHE STRING "Build with ${dependency}")

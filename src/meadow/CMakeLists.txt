@@ -1,3 +1,6 @@
+include(CheckCXXSymbolExists)
+check_cxx_symbol_exists(cyl_bessel_i cmath HAVE_CYL_BESSEL_I)
+
 file(GLOB_RECURSE sources CONFIGURE_DEPENDS *.h *.cpp)
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${sources})
 
@@ -14,6 +17,17 @@ target_precompile_headers(meadow
 target_include_directories(meadow
     PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>/include
 )
+
+if(HAVE_CYL_BESSEL_I)
+    target_compile_definitions(meadow PUBLIC MEADOW_HAS_CYL_BESSEL_I=1)
+else()
+    target_compile_definitions(meadow PUBLIC MEADOW_HAS_CYL_BESSEL_I=0)
+    if(MEADOW_HAS_BOOST)
+        target_link_libraries(meadow PRIVATE
+            Boost::math
+        )
+    endif()
+endif()
 
 if(MEADOW_HAS_EIGEN)
     target_link_libraries(meadow PRIVATE
