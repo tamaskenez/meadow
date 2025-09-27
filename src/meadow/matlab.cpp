@@ -52,7 +52,7 @@ double hann_poisson_fn(int n, int L, double alpha)
     if (n < 0 || L <= n) {
         return 0.0;
     }
-    const double N = L + 1;
+    const double N = L - 1;
     return 0.5 * (1 - cos(2 * num::pi * n / N)) * exp(-alpha * abs(N - 2 * n) / N);
 }
 

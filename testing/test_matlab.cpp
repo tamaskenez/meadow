@@ -249,3 +249,35 @@ TEST(matlab, kaiser_fn)
     );
 }
 #endif
+
+TEST(matlab, hann_poisson_fn)
+{
+    auto r7 = make_win(7, [](int n) {
+        return matlab::hann_poisson_fn(n, 7, 2.1);
+    });
+    auto r8 = make_win(8, [](int n) {
+        return matlab::hann_poisson_fn(n, 8, 2.9);
+    });
+
+    expect_near(
+      r7,
+      vector<double>(
+        {0, 0.061649240985402, 0.372438977843557, 1.000000000000000, 0.372438977843557, 0.061649240985402, 0}
+      ),
+      1e-15
+    );
+    expect_near(
+      r8,
+      vector<double>(
+        {0,
+         0.023721205183369,
+         0.176384455982313,
+         0.628091634613610,
+         0.628091634613610,
+         0.176384455982313,
+         0.023721205183369,
+         0}
+      ),
+      1e-15
+    );
+}
