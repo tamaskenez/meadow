@@ -3,6 +3,8 @@
 #include "meadow/cppext.h"
 #include "meadow/errno.h"
 
+#include <bit>
+
 // Helper class, for example, to supply Eigen matrices for reading.
 template<class T>
 struct MatrixReader {
@@ -155,4 +157,26 @@ double kaiser_fn(int n, int L, double beta);
 
 double hann_poisson_fn(int n, int L, double alpha);
 
+template<class T>
+T nextpow2(T x)
+{
+    if constexpr (std::is_signed_v<T>) {
+        if (x == std::numeric_limits<T>::min()) {
+            return static_cast<T>(sizeof(T) * 8 - 1);
+        }
+        if (x < 0) {
+            x = -x;
+        }
+        const auto ux = static_cast<std::make_unsigned_t<T>>(x);
+        return static_cast<T>(nextpow2(ux));
+    } else {
+        constexpr T k_highest_power_of_2 = static_cast<T>(1 << (sizeof(T) * 8 - 1));
+        if (x & k_highest_power_of_2) {
+            return x == k_highest_power_of_2 ? sizeof(T) * 8 - 1 : sizeof(T) * 8;
+        }
+        return static_cast<T>(
+          static_cast<T>(sizeof(T) * 8) - static_cast<T>(std::countl_zero(std::bit_ceil(x))) - T(1)
+        );
+    }
+}
 } // namespace matlab
