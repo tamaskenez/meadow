@@ -170,7 +170,7 @@ T nextpow2(T x)
         const auto ux = static_cast<std::make_unsigned_t<T>>(x);
         return static_cast<T>(nextpow2(ux));
     } else {
-        constexpr T k_highest_power_of_2 = static_cast<T>(1 << (sizeof(T) * 8 - 1));
+        constexpr T k_highest_power_of_2 = T(1) << (sizeof(T) * 8 - 1);
         if (x & k_highest_power_of_2) {
             return x == k_highest_power_of_2 ? sizeof(T) * 8 - 1 : sizeof(T) * 8;
         }
