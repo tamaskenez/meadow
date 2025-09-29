@@ -147,7 +147,7 @@ namespace detail
 {
 template<class R, class T>
     requires std::integral<R> && std::floating_point<T>
-R float_to_int_cast_core(T fx)
+constexpr R float_to_int_cast_core(T fx)
 {
     assert(
       !std::isnan(fx) && static_cast<T>(std::numeric_limits<R>::lowest()) <= fx
@@ -159,28 +159,28 @@ R float_to_int_cast_core(T fx)
 
 template<class R, class T>
     requires std::integral<R> && std::floating_point<T>
-R ifloor(T x)
+constexpr R ifloor(T x)
 {
     return detail::float_to_int_cast_core<R>(floor(x));
 }
 
 template<class R, class T>
     requires std::integral<R> && std::floating_point<T>
-R iround(T x)
+constexpr R iround(T x)
 {
     return detail::float_to_int_cast_core<R>(round(x));
 }
 
 template<class R, class T>
     requires std::integral<R> && std::floating_point<T>
-R iceil(T x)
+constexpr R iceil(T x)
 {
     return detail::float_to_int_cast_core<R>(ceil(x));
 }
 
 template<class To, class From>
     requires std::integral<To> && std::integral<From>
-To iicast(From f)
+constexpr To iicast(From f)
 {
     assert(std::in_range<To>(f));
     return static_cast<To>(f);
@@ -188,21 +188,21 @@ To iicast(From f)
 
 template<class To, class From>
     requires std::floating_point<To> && std::floating_point<From>
-To ffcast(From f)
+constexpr To ffcast(From f)
 {
     return static_cast<To>(f);
 }
 
 template<class To, class From>
     requires std::floating_point<To> && std::integral<From>
-To ifcast(From f)
+constexpr To ifcast(From f)
 {
     return static_cast<To>(f);
 }
 
 template<class From>
     requires std::integral<From> && std::unsigned_integral<From>
-auto uscast(From f)
+constexpr auto uscast(From f)
 {
     using To = typename std::make_signed<From>::type;
     assert(std::in_range<To>(f));
@@ -211,7 +211,7 @@ auto uscast(From f)
 
 template<class From>
     requires std::integral<From> && std::signed_integral<From>
-auto sucast(From f)
+constexpr auto sucast(From f)
 {
     using To = typename std::make_unsigned<From>::type;
     assert(std::in_range<To>(f));
@@ -220,7 +220,7 @@ auto sucast(From f)
 
 template<class From>
     requires std::integral<From>
-auto scast(From f)
+constexpr auto scast(From f)
 {
     using To = typename std::make_signed<From>::type;
     assert(std::in_range<To>(f));
@@ -229,19 +229,11 @@ auto scast(From f)
 
 template<class From>
     requires std::integral<From>
-auto ucast(From f)
+constexpr auto ucast(From f)
 {
     using To = typename std::make_unsigned<From>::type;
     assert(std::in_range<To>(f));
     return static_cast<To>(f);
-}
-
-template<class To, class From>
-auto bitcast(const From& f)
-{
-    static_assert(!std::is_pointer_v<To> && !std::is_pointer_v<From>, "bitcast doesn't work for pointer types");
-    static_assert(sizeof(To) == sizeof(From), "bitcast converts only between types of the same size");
-    return reinterpret_cast<const To&>(f);
 }
 
 #if MEADOW_HAS_ABSL == 1
