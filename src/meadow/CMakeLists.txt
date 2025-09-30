@@ -51,6 +51,12 @@ if(MEADOW_HAS_SDL)
     target_include_directories(meadow SYSTEM PRIVATE ${sdl_include_dirs})
 endif()
 
+if(MEADOW_HAS_SDL_MIXER)
+    target_link_libraries(meadow PUBLIC
+        SDL3_mixer::SDL3_mixer
+    )
+endif()
+
 foreach(dependency IN LISTS dependencies)
     if(MEADOW_HAS_${dependency})
         target_compile_definitions(meadow PUBLIC MEADOW_HAS_${dependency}=1)
