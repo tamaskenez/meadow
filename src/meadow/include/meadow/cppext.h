@@ -294,6 +294,7 @@ struct std::hash<std::pair<A, B>> {
         return h;
     }
 };
+} // namespace std
 
 template<class T>
 void remove_prefix(std::span<T>& s, size_t n)
@@ -309,4 +310,9 @@ void remove_postfix(std::span<T>& s, size_t n)
     s = span(s.begin(), s.end() - uscast(n));
 }
 
-} // namespace std
+template<class R, class B, class E>
+    requires std::integral<R> && std::integral<B> && std::integral<E>
+auto vi_iota(B b, E e)
+{
+    return vi::iota(iicast<R>(b), iicast<R>(e));
+}
