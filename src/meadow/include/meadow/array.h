@@ -8,3 +8,6 @@ using AF4 = std::array<float, 4>;
 using AI2 = std::array<int, 2>;
 using AI3 = std::array<int, 3>;
 using AI4 = std::array<int, 4>;
+using AD2 = std::array<double, 2>;
+using AD3 = std::array<double, 3>;
+using AD4 = std::array<double, 4>;

@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cassert>
 #include <cmath>
 #include <concepts>
 #include <span>
@@ -23,14 +24,14 @@ std::pair<R, R> extremumOfParabola(std::span<const X> xs, std::span<const Y> ys)
 
 template<class T>
     requires std::integral<T>
-bool isEven(T x)
+bool is_even(T x)
 {
     return (x & 1) == 0;
 }
 
 template<class T>
     requires std::integral<T>
-bool isOdd(T x)
+bool is_odd(T x)
 {
     return (x & 1) == 1;
 }
@@ -78,4 +79,11 @@ T modulo(T x, T y)
 {
     assert(y > 0);
     return ((x % y) + y) % y;
+}
+
+template<class X, class L, class H>
+bool in_cc_range(const X& x, const L& lo, const H& hi)
+{
+    assert(lo <= hi);
+    return lo <= x && x <= hi;
 }
