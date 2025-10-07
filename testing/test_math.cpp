@@ -56,26 +56,26 @@ TEST(math, extremumOfParabola2)
 }
 #endif
 
-TEST(math, isEven)
+TEST(math, is_even)
 {
-    EXPECT_FALSE(isEven(-3));
-    EXPECT_TRUE(isEven(-2));
-    EXPECT_FALSE(isEven(-1));
-    EXPECT_TRUE(isEven(0));
-    EXPECT_FALSE(isEven(1));
-    EXPECT_TRUE(isEven(2));
-    EXPECT_FALSE(isEven(3));
+    EXPECT_FALSE(is_even(-3));
+    EXPECT_TRUE(is_even(-2));
+    EXPECT_FALSE(is_even(-1));
+    EXPECT_TRUE(is_even(0));
+    EXPECT_FALSE(is_even(1));
+    EXPECT_TRUE(is_even(2));
+    EXPECT_FALSE(is_even(3));
 }
 
-TEST(math, isOdd)
+TEST(math, is_odd)
 {
-    EXPECT_TRUE(isOdd(-3));
-    EXPECT_FALSE(isOdd(-2));
-    EXPECT_TRUE(isOdd(-1));
-    EXPECT_FALSE(isOdd(0));
-    EXPECT_TRUE(isOdd(1));
-    EXPECT_FALSE(isOdd(2));
-    EXPECT_TRUE(isOdd(3));
+    EXPECT_TRUE(is_odd(-3));
+    EXPECT_FALSE(is_odd(-2));
+    EXPECT_TRUE(is_odd(-1));
+    EXPECT_FALSE(is_odd(0));
+    EXPECT_TRUE(is_odd(1));
+    EXPECT_FALSE(is_odd(2));
+    EXPECT_TRUE(is_odd(3));
 }
 
 template<class T>

@@ -56,4 +56,41 @@ double hann_poisson_fn(int n, int L, double alpha)
     return 0.5 * (1 - cos(2 * num::pi * n / N)) * exp(-alpha * abs(N - 2 * n) / N);
 }
 
+template<class T>
+array<T, 2> polyfit1(span<const T> xs, span<const T> ys)
+{
+    // X = [1 xs[0]      Y = [ys[0]
+    //      1 xs[1]           ys[1]
+    //      ...    ];         ...  ];
+    //
+    // beta = (X'*X)^-1 * X'*Y
+    //
+    // X' * X = [  N     sum(xs)
+    //           sum(xs) sum(xs^2)]
+    //
+    const auto N = xs.size();
+    CHECK(ys.size() == N);
+    assert(N >= 2);
+    T sx = 0, sx2 = 0, sy = 0, sxy = 0;
+    for (auto&& [x, y] : vi::zip(xs, ys)) {
+        sx += x;
+        sx2 += square(x);
+        sy += y;
+        sxy += x * y;
+    }
+    auto det = N * sx2 - square(sx);
+    // [sx2 -sx
+    //  -sx  N] / det
+    //
+    // X'*Y = [sy
+    //         sxy]
+    //
+    // beta = [sx2 * sy + sx * sxy
+    //         sx * sy + N * sxy] / det
+    return array<T, 2>{(N * sxy - sx * sy) / det, (sx2 * sy - sx * sxy) / det};
+}
+
+template array<float, 2> polyfit1(span<const float> xs, span<const float> ys);
+template array<double, 2> polyfit1(span<const double> xs, span<const double> ys);
+
 } // namespace matlab

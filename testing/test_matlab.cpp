@@ -323,3 +323,18 @@ TEST(matlab, nextpow2_int)
     EXPECT_EQ(matlab::nextpow2(65536), 16);
     EXPECT_EQ(matlab::nextpow2(65537), 17);
 }
+
+TEST(matlab, polyfit1)
+{
+    vector<double> xs = {1, -2, 5, 6, 9, 10};
+    vector<double> ys = {-3, 5, 4, 8, 10, 11};
+    auto r = matlab::polyfit1<double>(xs, ys);
+    EXPECT_NEAR(r[0], 0.803432137285491, 1e-12);
+    EXPECT_NEAR(r[1], 1.950078003120126, 1e-12);
+
+    xs = {1.0, 2.0, 3.0};
+    ys = {3.0, 5.0, 7.0};
+    r = matlab::polyfit1<double>(xs, ys);
+    EXPECT_DOUBLE_EQ(r[0], 2.0);
+    EXPECT_DOUBLE_EQ(r[1], 1.0);
+}

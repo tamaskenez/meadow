@@ -12,9 +12,13 @@
   #include <SDL3_mixer/SDL_mixer.h>
 #endif
 
+#include <any>
+#include <chrono>
 #include <memory>
 #include <source_location>
+#include <string>
 #include <type_traits>
+#include <vector>
 
 // A std::unique_ptr-like object for SDL types, like SDL_Window, SDL_Renderer, etc.. which calls the appropriate
 // SDL_Destroy* function in its destructor.
@@ -89,6 +93,9 @@ T check_sdl(T result, bool terminate_on_error, const std::source_location locati
 #define CHECK_SDL(X) check_sdl(X, true)
 #define EXPECT_SDL(X) check_sdl(X, false)
 
+template<class T>
+const T* sdl_event_cast(const SDL_Event* event);
+
 const SDL_UserEvent* sdl_user_event_cast(const SDL_Event* event, uint32_t user_event_type);
 
 // Call SDL_PushEvent with SDL_UserEvent by moving `event` onto the heap and SDL_UserEvent::data1 contains the pointer
@@ -108,5 +115,28 @@ uint32_t get_user_event_type_any();
 #if MEADOW_HAS_SDL_MIXER == 1
 // Return the file extensions (without the dot) which the currently enabled MIX decoders support.
 // Call MIX_Init() before calling this function.
-vector<string> get_extensions_for_mix_decoders();
+std::vector<std::string> get_extensions_for_mix_decoders();
 #endif
+
+class sdl_clock
+{
+public:
+    using rep = uint64_t;
+    using period = std::nano;
+    using duration = std::chrono::duration<rep, period>;
+    using time_point = std::chrono::time_point<sdl_clock>;
+    static constexpr bool is_steady()
+    {
+        return true;
+    }
+    static time_point now() noexcept
+    {
+        return time_point(duration(SDL_GetTicksNS()));
+    }
+    static time_point from_ticks_ns(uint64_t t)
+    {
+        return time_point(duration(t));
+    }
+};
+
+std::string sdl_get_event_description(SDL_Event* event);

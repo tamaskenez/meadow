@@ -179,4 +179,7 @@ T nextpow2(T x)
         );
     }
 }
+
+template<class T>
+std::array<T, 2> polyfit1(std::span<const T> xs, std::span<const T> ys);
 } // namespace matlab

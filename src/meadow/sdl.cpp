@@ -73,3 +73,51 @@ vector<string> get_extensions_for_mix_decoders()
     return result;
 }
 #endif
+
+#define DEFINE_SDL_EVENT_CAST_1(EVENT_TYPE, TYPE_1)                                          \
+    template<>                                                                               \
+    const EVENT_TYPE* sdl_event_cast(const SDL_Event* event)                                 \
+    {                                                                                        \
+        return event->type == TYPE_1 ? reinterpret_cast<const EVENT_TYPE*>(event) : nullptr; \
+    }
+
+#define DEFINE_SDL_EVENT_CAST_2(EVENT_TYPE, TYPE_1, TYPE_2)                                                           \
+    template<>                                                                                                        \
+    const EVENT_TYPE* sdl_event_cast(const SDL_Event* event)                                                          \
+    {                                                                                                                 \
+        return event->type == TYPE_1 || event->type == TYPE_2 ? reinterpret_cast<const EVENT_TYPE*>(event) : nullptr; \
+    }
+
+#define DEFINE_SDL_EVENT_CAST_3(EVENT_TYPE, TYPE_1, TYPE_2, TYPE_3)                    \
+    template<>                                                                         \
+    const EVENT_TYPE* sdl_event_cast(const SDL_Event* event)                           \
+    {                                                                                  \
+        return event->type == TYPE_1 || event->type == TYPE_2 || event->type == TYPE_3 \
+               ? reinterpret_cast<const EVENT_TYPE*>(event)                            \
+               : nullptr;                                                              \
+    }
+
+#define DEFINE_SDL_EVENT_CAST_FROM_TO(EVENT_TYPE, TYPE_FROM, TYPE_TO)                                          \
+    template<>                                                                                                 \
+    const EVENT_TYPE* sdl_event_cast(const SDL_Event* event)                                                   \
+    {                                                                                                          \
+        return TYPE_FROM <= event->type && event->type <= TYPE_TO ? reinterpret_cast<const EVENT_TYPE*>(event) \
+                                                                  : nullptr;                                   \
+    }
+
+DEFINE_SDL_EVENT_CAST_1(SDL_QuitEvent, SDL_EVENT_QUIT)
+DEFINE_SDL_EVENT_CAST_1(SDL_MouseMotionEvent, SDL_EVENT_MOUSE_MOTION)
+DEFINE_SDL_EVENT_CAST_2(SDL_KeyboardEvent, SDL_EVENT_KEY_DOWN, SDL_EVENT_KEY_UP)
+DEFINE_SDL_EVENT_CAST_2(SDL_MouseButtonEvent, SDL_EVENT_MOUSE_BUTTON_DOWN, SDL_EVENT_MOUSE_BUTTON_UP)
+DEFINE_SDL_EVENT_CAST_FROM_TO(SDL_TouchFingerEvent, SDL_EVENT_FINGER_DOWN, SDL_EVENT_FINGER_CANCELED)
+
+std::string sdl_get_event_description(SDL_Event* event)
+{
+    int n = SDL_GetEventDescription(event, nullptr, 0);
+    std::string s(iicast<size_t>(n) + 1, 0);
+    SDL_GetEventDescription(event, s.data(), n);
+    while (!s.empty() && s.back() == 0) {
+        s.pop_back();
+    }
+    return s;
+}
