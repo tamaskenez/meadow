@@ -121,3 +121,147 @@ std::string sdl_get_event_description(SDL_Event* event)
     }
     return s;
 }
+
+vector<string> sdl_get_render_drivers()
+{
+    vector<string> r;
+    for (int i : vi_iota<int>(0, SDL_GetNumRenderDrivers())) {
+        const char* name = SDL_GetRenderDriver(i);
+        CHECK(name);
+        r.push_back(name);
+    }
+    return r;
+}
+
+namespace
+{
+void sdl_enumerate_properties_callback(void* userdata, SDL_PropertiesID /*props*/, const char* name)
+{
+    auto* vs = reinterpret_cast<vector<string>*>(userdata);
+    vs->push_back(name);
+}
+} // namespace
+
+vector<string> sdl_enumerate_properties(SDL_PropertiesID props)
+{
+    vector<string> vs;
+    CHECK_SDL(SDL_EnumerateProperties(props, sdl_enumerate_properties_callback, &vs));
+    return vs;
+}
+
+string sdl_get_property_as_string(SDL_PropertiesID props, const char* name)
+{
+    SDL_PropertyType pt = SDL_GetPropertyType(props, name);
+    switch (pt) {
+    case SDL_PROPERTY_TYPE_INVALID:
+        LOG(FATAL) << format("Invalid property: {}", name);
+    case SDL_PROPERTY_TYPE_POINTER:
+        return format("{}", SDL_GetPointerProperty(props, name, nullptr));
+    case SDL_PROPERTY_TYPE_STRING:
+        return SDL_GetStringProperty(props, name, "<ERROR>");
+    case SDL_PROPERTY_TYPE_NUMBER:
+        return std::to_string(SDL_GetNumberProperty(props, name, INT64_MIN));
+    case SDL_PROPERTY_TYPE_FLOAT:
+        return std::to_string(SDL_GetFloatProperty(props, name, NAN));
+    case SDL_PROPERTY_TYPE_BOOLEAN:
+        return SDL_GetBooleanProperty(props, name, false) ? "true" : "false";
+    }
+}
+
+namespace
+{
+const vector<pair<uint32_t, const char*>> k_sdl_gpu_shader_formats = {
+#define SHADER_FORMAT_ITEM(X) {X, #X}
+  SHADER_FORMAT_ITEM(SDL_GPU_SHADERFORMAT_PRIVATE),
+  SHADER_FORMAT_ITEM(SDL_GPU_SHADERFORMAT_SPIRV),
+  SHADER_FORMAT_ITEM(SDL_GPU_SHADERFORMAT_DXBC),
+  SHADER_FORMAT_ITEM(SDL_GPU_SHADERFORMAT_DXIL),
+  SHADER_FORMAT_ITEM(SDL_GPU_SHADERFORMAT_MSL),
+  SHADER_FORMAT_ITEM(SDL_GPU_SHADERFORMAT_METALLIB)
+#undef SHADER_FORMAT_ITEM
+};
+
+const vector<pair<SDL_Colorspace, const char*>> k_sdl_colorspace = {
+#define COLORSPACE_ITEM(X) {X, #X}
+  COLORSPACE_ITEM(SDL_COLORSPACE_SRGB),
+  COLORSPACE_ITEM(SDL_COLORSPACE_SRGB_LINEAR),
+  COLORSPACE_ITEM(SDL_COLORSPACE_HDR10),
+  COLORSPACE_ITEM(SDL_COLORSPACE_JPEG),
+  COLORSPACE_ITEM(SDL_COLORSPACE_BT601_LIMITED),
+  COLORSPACE_ITEM(SDL_COLORSPACE_BT601_FULL),
+  COLORSPACE_ITEM(SDL_COLORSPACE_BT709_LIMITED),
+  COLORSPACE_ITEM(SDL_COLORSPACE_BT709_FULL),
+  COLORSPACE_ITEM(SDL_COLORSPACE_BT2020_LIMITED),
+  COLORSPACE_ITEM(SDL_COLORSPACE_BT2020_FULL)
+#undef COLORSPACE_ITEM
+};
+} // namespace
+
+SDLRendererInfo get_sdl_renderer_info(SDL_Renderer* renderer)
+{
+    SDLRendererInfo ri;
+    if (auto* name = SDL_GetRendererName(renderer)) {
+        ri.name = name;
+    } else {
+        ri.name = format("<ERROR: {}>", SDL_GetError());
+    }
+    int vsync;
+    if (SDL_GetRenderVSync(renderer, &vsync)) {
+        ri.vsync = std::to_string(vsync);
+    } else {
+        ri.vsync = format("<ERROR: {}>", SDL_GetError());
+    }
+    {
+        SDL_PropertiesID props_id = CHECK_SDL(SDL_GetRendererProperties(renderer));
+        auto prop_names = sdl_enumerate_properties(props_id);
+        for (auto& pn : prop_names) {
+            bool found = false;
+            if (pn == SDL_PROP_RENDERER_OUTPUT_COLORSPACE_NUMBER) {
+                auto c = SDL_GetNumberProperty(props_id, pn.c_str(), 0);
+                for (auto [k, v] : k_sdl_colorspace) {
+                    if (k == c) {
+                        ri.props.push_back(pair(pn, v));
+                        found = true;
+                        break;
+                    }
+                }
+            } else if (pn == SDL_PROP_RENDERER_TEXTURE_FORMATS_POINTER) {
+                const SDL_PixelFormat* pixel_formats =
+                  static_cast<const SDL_PixelFormat*>(SDL_GetPointerProperty(props_id, pn.c_str(), nullptr));
+                if (pixel_formats) {
+                    found = true;
+                    string s;
+                    for (; *pixel_formats != SDL_PIXELFORMAT_UNKNOWN; ++pixel_formats) {
+                        if (!s.empty()) {
+                            s += '|';
+                        }
+                        s += SDL_GetPixelFormatName(*pixel_formats);
+                    }
+                    ri.props.push_back(pair(pn, s));
+                }
+            }
+            if (!found) {
+                ri.props.push_back(pair(pn, sdl_get_property_as_string(props_id, pn.c_str())));
+            }
+        }
+    }
+    if (SDL_GPUDevice* gpu_device = SDL_GetGPURendererDevice(renderer)) {
+        SDLGPUDeviceInfo gdi;
+        gdi.name = CHECK_SDL(SDL_GetGPUDeviceDriver(gpu_device));
+        SDL_GPUShaderFormat gsf = SDL_GetGPUShaderFormats(gpu_device);
+        for (auto [v, s] : k_sdl_gpu_shader_formats) {
+            if (gsf & v) {
+                gdi.shader_formats.push_back(s);
+            }
+        }
+        {
+            SDL_PropertiesID props_id = CHECK_SDL(SDL_GetGPUDeviceProperties(gpu_device));
+            auto prop_names = sdl_enumerate_properties(props_id);
+            for (auto& pn : prop_names) {
+                gdi.props.push_back(pair(pn, sdl_get_property_as_string(props_id, pn.c_str())));
+            }
+        }
+        ri.gpu_device_info = MOVE(gdi);
+    }
+    return ri;
+}

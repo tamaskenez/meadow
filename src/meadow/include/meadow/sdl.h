@@ -121,7 +121,7 @@ std::vector<std::string> get_extensions_for_mix_decoders();
 class sdl_clock
 {
 public:
-    using rep = uint64_t;
+    using rep = int64_t;
     using period = std::nano;
     using duration = std::chrono::duration<rep, period>;
     using time_point = std::chrono::time_point<sdl_clock>;
@@ -140,3 +140,22 @@ public:
 };
 
 std::string sdl_get_event_description(SDL_Event* event);
+
+std::vector<std::string> sdl_get_render_drivers();
+std::vector<std::string> sdl_enumerate_properties(SDL_PropertiesID props);
+std::string sdl_get_property_as_string(SDL_PropertiesID props, const char* name);
+
+struct SDLGPUDeviceInfo {
+    std::string name;
+    std::vector<std::string> shader_formats;
+    std::vector<std::pair<std::string, std::string>> props;
+};
+
+struct SDLRendererInfo {
+    std::string name;
+    std::string vsync;
+    std::vector<std::pair<std::string, std::string>> props;
+    std::optional<SDLGPUDeviceInfo> gpu_device_info;
+};
+
+SDLRendererInfo get_sdl_renderer_info(SDL_Renderer* renderer);
