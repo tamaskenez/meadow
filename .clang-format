@@ -29,3 +29,6 @@ PackConstructorInitializers: Never
 PointerAlignment: Left
 PPIndentWidth:   2
 SpaceAfterTemplateKeyword: false
+Macros:
+- EVARIANT_CASE(n, a, v)=case n:{
+- EVARIANT_BREAK=}
