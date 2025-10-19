@@ -81,9 +81,9 @@
     {                                    \
         return E(v.index());             \
     }
-#define EVARIANT_CASE(NAMESPACE, ALTERNATIVE, VAR) \
-    case NAMESPACE::E::ALTERNATIVE: {              \
-        auto& VAR = std::get<NAMESPACE::ALTERNATIVE>(v);
+#define EVARIANT_CASE(VARIANT_VAR, NAMESPACE, ALT, ALT_VAR) \
+    case NAMESPACE::E::ALT: {                               \
+        auto& ALT_VAR = std::get<NAMESPACE::ALT>(VARIANT_VAR);
 #define EVARIANT_BREAK \
     }                  \
     break;
