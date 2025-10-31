@@ -1,4 +1,5 @@
 #include "meadow/matlab.h"
+#include "meadow/cppext.h"
 #include "meadow/math.h"
 
 #if MEADOW_HAS_CYL_BESSEL_I == 0 && MEADOW_HAS_BOOST == 1
@@ -7,10 +8,23 @@
 
 namespace matlab
 {
+
 double rectwin_fn(int n, int L)
 {
     return 0 <= n && n < L ? 1.0 : 0.0;
 }
+
+std::vector<double> blackman(int L)
+{
+    vector<double> w(sucast(L));
+    const double c0 = 2 * num::pi / (L - 1);
+    const double c1 = 4 * num::pi / (L - 1);
+    for (auto n : vi_iota<int>(0, L)) {
+        w[sucast(n)] = 0.42 - 0.5 * cos(c0 * n) + 0.08 * cos(c1 * n);
+    }
+    return w;
+}
+
 double blackman_fn(int n, int L)
 {
     if (n < 0 || L <= n) {
@@ -54,6 +68,18 @@ double hann_poisson_fn(int n, int L, double alpha)
     }
     const double N = L - 1;
     return 0.5 * (1 - cos(2 * num::pi * n / N)) * exp(-alpha * abs(N - 2 * n) / N);
+}
+
+double sum(const vector<double>& xs)
+{
+    return std::accumulate(BEGIN_END(xs), 0.0);
+}
+
+void operator/=(vector<double>& xs, const double y)
+{
+    for (auto& x : xs) {
+        x /= y;
+    }
 }
 
 template<class T>

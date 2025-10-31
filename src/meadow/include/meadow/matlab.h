@@ -148,6 +148,7 @@ auto interp1(X&& x, V&& v, XQ xq) -> std::decay_t<decltype(*std::begin(v))>
 }
 
 double rectwin_fn(int n, int L);
+std::vector<double> blackman(int L);
 double blackman_fn(int n, int L);
 double gausswin_fn(int n, int L, double alpha);
 
@@ -179,6 +180,9 @@ T nextpow2(T x)
         );
     }
 }
+
+double sum(const vector<double>& xs);
+void operator/=(vector<double>& xs, const double y);
 
 template<class T>
 std::array<T, 2> polyfit1(std::span<const T> xs, std::span<const T> ys);
