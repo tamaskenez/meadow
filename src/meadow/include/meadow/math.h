@@ -87,3 +87,10 @@ bool in_cc_range(const X& x, const L& lo, const H& hi)
     assert(lo <= hi);
     return lo <= x && x <= hi;
 }
+
+template<class X, class L, class H>
+bool in_co_range(const X& x, const L& lo, const H& hi)
+{
+    assert(lo <= hi);
+    return lo <= x && x < hi;
+}
