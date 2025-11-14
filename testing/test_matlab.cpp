@@ -338,3 +338,14 @@ TEST(matlab, polyfit1)
     EXPECT_DOUBLE_EQ(r[0], 2.0);
     EXPECT_DOUBLE_EQ(r[1], 1.0);
 }
+
+TEST(matlab, polyval)
+{
+    array<double, 4> cs{2, 3, 4, 5};
+    constexpr double x = 7;
+    ASSERT_EQ(matlab::polyval(span<const double>(cs.data(), 0), x), 0.0);
+    ASSERT_EQ(matlab::polyval(span<const double>(cs.data(), 1), x), 2.0);
+    ASSERT_EQ(matlab::polyval(span<const double>(cs.data(), 2), x), 17.0);
+    ASSERT_EQ(matlab::polyval(span<const double>(cs.data(), 3), x), 123.0);
+    ASSERT_EQ(matlab::polyval(span<const double>(cs.data(), 4), x), 866.0);
+}

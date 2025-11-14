@@ -119,4 +119,26 @@ array<T, 2> polyfit1(span<const T> xs, span<const T> ys)
 template array<float, 2> polyfit1(span<const float> xs, span<const float> ys);
 template array<double, 2> polyfit1(span<const double> xs, span<const double> ys);
 
+template<class T>
+T polyval(std::span<const T> cs, T x)
+{
+    const auto N = cs.size();
+    switch (N) {
+    case 0:
+        return 0.0;
+    case 1:
+        return cs.front();
+    default: {
+        T s = cs.front();
+        for (size_t i = 1; i < N; ++i) {
+            s = (s * x) + cs[i];
+        }
+        return s;
+    }
+    }
+}
+
+template float polyval(std::span<const float> cs, float x);
+template double polyval(std::span<const double> cs, double x);
+
 } // namespace matlab

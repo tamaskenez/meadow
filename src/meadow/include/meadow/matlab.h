@@ -186,4 +186,7 @@ void operator/=(vector<double>& xs, const double y);
 
 template<class T>
 std::array<T, 2> polyfit1(std::span<const T> xs, std::span<const T> ys);
+
+template<class T>
+T polyval(std::span<const T> cs, T x);
 } // namespace matlab
