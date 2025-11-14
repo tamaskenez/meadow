@@ -154,4 +154,25 @@ std::vector<T> polyder(std::span<const T> cs)
 template std::vector<float> polyder(std::span<const float> cs);
 template std::vector<double> polyder(std::span<const double> cs);
 
+template<class T>
+std::inplace_vector<T, 2> real_roots2(std::span<const T, 3> cs)
+{
+    const auto D = square(cs[1]) - 4 * cs[0] * cs[2];
+    if (D < 0) {
+        return {};
+    }
+    if (D > 0) {
+        const auto sqrt_D = sqrt(D);
+        auto r = std::inplace_vector<T, 2>({(-cs[1] - sqrt_D) / (2 * cs[0]), (-cs[1] + sqrt_D) / (2 * cs[0])});
+        if (r[0] > r[1]) {
+            std::swap(r[0], r[1]);
+        }
+        return r;
+    }
+    return std::inplace_vector<T, 2>({-cs[1] / (2 * cs[0])});
+}
+
+template std::inplace_vector<float, 2> roots2(std::span<const float, 3> cs);
+template std::inplace_vector<double, 2> roots2(std::span<const double, 3> cs);
+
 } // namespace matlab

@@ -5,7 +5,8 @@ file(GLOB_RECURSE sources CONFIGURE_DEPENDS *.h *.cpp)
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${sources})
 
 if(NOT MEADOW_HAS_SDL)
-    list(FILTER sources EXCLUDE REGEX "^sdl\\.*$")
+    list(FILTER sources EXCLUDE REGEX "/sdl\\.*$")
+    list(FILTER sources EXCLUDE REGEX "/SDL\\.*$")
 endif()
 
 add_library(meadow STATIC ${sources})

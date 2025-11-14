@@ -4,6 +4,7 @@
 #include "meadow/errno.h"
 
 #include <bit>
+#include <meadow/inplace_vector.h>
 
 // Helper class, for example, to supply Eigen matrices for reading.
 template<class T>
@@ -193,4 +194,6 @@ T polyval(std::span<const T> cs, T x);
 template<class T>
 std::vector<T> polyder(std::span<const T> cs);
 
+template<class T>
+std::inplace_vector<T, 2> real_roots2(std::span<const T, 3> cs);
 } // namespace matlab

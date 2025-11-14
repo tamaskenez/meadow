@@ -359,3 +359,27 @@ TEST(matlab, polyder)
     ASSERT_EQ(matlab::polyder(span<const double>(cs.data(), 3)), std::vector<double>({4.0, 3.0}));
     ASSERT_EQ(matlab::polyder(span<const double>(cs.data(), 4)), std::vector<double>({6.0, 6.0, 4.0}));
 }
+
+TEST(matlab, roots2)
+{
+    {
+        auto r = matlab::real_roots2<double>(array<double, 3>({3, 6, -105}));
+        const auto e = std::inplace_vector<double, 2>({-7, 5});
+        ASSERT_EQ(r, e);
+    }
+    {
+        auto r = matlab::real_roots2<double>(array<double, 3>({3, -30, 75}));
+        const auto e = std::inplace_vector<double, 2>({5});
+        ASSERT_EQ(r, e);
+    }
+    {
+        auto r = matlab::real_roots2<double>(array<double, 3>({3, 30, 75}));
+        const auto e = std::inplace_vector<double, 2>({-5});
+        ASSERT_EQ(r, e);
+    }
+    {
+        auto r = matlab::real_roots2<double>(array<double, 3>({3, 5, 7}));
+        ASSERT_TRUE(r.empty());
+    }
+    NOP;
+}
