@@ -123,19 +123,14 @@ template<class T>
 T polyval(std::span<const T> cs, T x)
 {
     const auto N = cs.size();
-    switch (N) {
-    case 0:
-        return 0.0;
-    case 1:
-        return cs.front();
-    default: {
-        T s = cs.front();
-        for (size_t i = 1; i < N; ++i) {
-            s = (s * x) + cs[i];
-        }
-        return s;
+    if (N == 0) {
+        return T(0);
     }
+    T s = cs.front();
+    for (size_t i = 1; i < N; ++i) {
+        s = (s * x) + cs[i];
     }
+    return s;
 }
 
 template float polyval(std::span<const float> cs, float x);
