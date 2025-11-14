@@ -189,4 +189,8 @@ std::array<T, 2> polyfit1(std::span<const T> xs, std::span<const T> ys);
 
 template<class T>
 T polyval(std::span<const T> cs, T x);
+
+template<class T>
+std::vector<T> polyder(std::span<const T> cs);
+
 } // namespace matlab

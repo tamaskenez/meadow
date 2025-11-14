@@ -349,3 +349,13 @@ TEST(matlab, polyval)
     ASSERT_EQ(matlab::polyval(span<const double>(cs.data(), 3), x), 123.0);
     ASSERT_EQ(matlab::polyval(span<const double>(cs.data(), 4), x), 866.0);
 }
+
+TEST(matlab, polyder)
+{
+    array<double, 4> cs{2, 3, 4, 5};
+    ASSERT_EQ(matlab::polyder(span<const double>(cs.data(), 0)), std::vector<double>({0.0}));
+    ASSERT_EQ(matlab::polyder(span<const double>(cs.data(), 1)), std::vector<double>({0.0}));
+    ASSERT_EQ(matlab::polyder(span<const double>(cs.data(), 2)), std::vector<double>({2.0}));
+    ASSERT_EQ(matlab::polyder(span<const double>(cs.data(), 3)), std::vector<double>({4.0, 3.0}));
+    ASSERT_EQ(matlab::polyder(span<const double>(cs.data(), 4)), std::vector<double>({6.0, 6.0, 4.0}));
+}

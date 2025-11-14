@@ -136,4 +136,22 @@ T polyval(std::span<const T> cs, T x)
 template float polyval(std::span<const float> cs, float x);
 template double polyval(std::span<const double> cs, double x);
 
+template<class T>
+std::vector<T> polyder(std::span<const T> cs)
+{
+    const auto N = cs.size();
+    if (N <= 1) {
+        return std::vector<T>({T(0)});
+    }
+    std::vector<T> pd;
+    pd.reserve(cs.size() - 1);
+    for (size_t i : vi_iota<size_t>(0, N - 1)) {
+        pd.push_back((N - i - 1) * cs[i]);
+    }
+    return pd;
+}
+
+template std::vector<float> polyder(std::span<const float> cs);
+template std::vector<double> polyder(std::span<const double> cs);
+
 } // namespace matlab
