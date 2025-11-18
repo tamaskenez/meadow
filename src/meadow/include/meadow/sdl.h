@@ -57,6 +57,7 @@ DEFINE_SDL_UNIQUE_PTR(SDL_AudioStream, SDL_DestroyAudioStream)
 #if MEADOW_HAS_SDL_MIXER == 1
 DEFINE_SDL_UNIQUE_PTR(MIX_Mixer, MIX_DestroyMixer)
 DEFINE_SDL_UNIQUE_PTR(MIX_Audio, MIX_DestroyAudio)
+DEFINE_SDL_UNIQUE_PTR(MIX_Track, MIX_DestroyTrack)
 DEFINE_SDL_UNIQUE_PTR(MIX_AudioDecoder, MIX_DestroyAudioDecoder)
 #endif
 

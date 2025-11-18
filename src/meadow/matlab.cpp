@@ -172,7 +172,7 @@ std::inplace_vector<T, 2> real_roots2(std::span<const T, 3> cs)
     return std::inplace_vector<T, 2>({-cs[1] / (2 * cs[0])});
 }
 
-template std::inplace_vector<float, 2> roots2(std::span<const float, 3> cs);
-template std::inplace_vector<double, 2> roots2(std::span<const double, 3> cs);
+template std::inplace_vector<float, 2> real_roots2(std::span<const float, 3> cs);
+template std::inplace_vector<double, 2> real_roots2(std::span<const double, 3> cs);
 
 } // namespace matlab
