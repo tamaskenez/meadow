@@ -138,6 +138,10 @@ public:
     {
         return time_point(duration(t));
     }
+    static duration duration_from_seconds(double s)
+    {
+        return std::chrono::duration_cast<duration>(std::chrono::duration<double>(s));
+    }
 };
 
 std::string sdl_get_event_description(SDL_Event* event);
