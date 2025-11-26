@@ -3,8 +3,13 @@
 #include "meadow/cppext.h"
 #include "meadow/errno.h"
 
+#include "meadow/inplace_vector.h"
+
 #include <bit>
-#include <meadow/inplace_vector.h>
+
+#if MEADOW_HAS_EIGEN == 1
+  #include <mdspan> // For polyfit.
+#endif
 
 // Helper class, for example, to supply Eigen matrices for reading.
 template<class T>
@@ -196,4 +201,12 @@ std::vector<T> polyder(std::span<const T> cs);
 
 template<class T>
 std::inplace_vector<T, 2> real_roots2(std::span<const T, 3> cs);
+
+#if MEADOW_HAS_EIGEN == 1
+std::vector<double> polyfit(
+  std::mdspan<const double, std::dextents<size_t, 1>, std::layout_stride> xs,
+  std::mdspan<const double, std::dextents<size_t, 1>, std::layout_stride> ys,
+  int degree
+);
+#endif
 } // namespace matlab

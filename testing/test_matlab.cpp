@@ -1,5 +1,7 @@
 #include "meadow/matlab.h"
 
+#include "meadow/span.h"
+
 #include <gtest/gtest.h>
 
 TEST(matlab, mag2db)
@@ -382,4 +384,47 @@ TEST(matlab, roots2)
         ASSERT_TRUE(r.empty());
     }
     NOP;
+}
+
+TEST(matlab, polyfit)
+{
+    constexpr double eps = 1e-12;
+    vector<double> xs = {-5, -3, 1, 2, 7, 11};
+    vector<double> ys = {11, 13, 14, 7, 3, -2};
+    {
+        auto p = matlab::polyfit(mdspan_from_data_size(xs), mdspan_from_data_size(ys), 0);
+        expect_near(p, vector<double>({7.666666666666668}), eps);
+    }
+    {
+        auto p = matlab::polyfit(mdspan_from_data_size(xs), mdspan_from_data_size(ys), 1);
+        expect_near(p, vector<double>({-0.921658986175115, 9.663594470046085}), eps);
+    }
+    {
+        auto p = matlab::polyfit(mdspan_from_data_size(xs), mdspan_from_data_size(ys), 2);
+        expect_near(p, vector<double>({-6.646772924152947e-02, -5.253642945037290e-01, 1.112024854000469e+01}), eps);
+    }
+    {
+        auto p = matlab::polyfit(mdspan_from_data_size(xs), mdspan_from_data_size(ys), 3);
+        expect_near(
+          p,
+          vector<double>(
+            {1.071777767961007e-02, -1.590780807006455e-01, -8.295077324054219e-01, 1.227033362670373e+01}
+          ),
+          eps
+        );
+    }
+    {
+        auto p = matlab::polyfit(mdspan_from_data_size(xs), mdspan_from_data_size(ys), 4);
+        expect_near(
+          p,
+          vector<double>(
+            {-1.064021272966234e-03,
+             2.394466621795351e-02,
+             -1.485789244316916e-01,
+             -1.148467745106906e+00,
+             1.237102163786194e+01}
+          ),
+          eps
+        );
+    }
 }

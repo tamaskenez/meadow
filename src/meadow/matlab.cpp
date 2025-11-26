@@ -6,6 +6,10 @@
   #include <boost/math/special_functions/bessel.hpp>
 #endif
 
+#if MEADOW_HAS_EIGEN == 1
+  #include "meadow/eigen_dense.h"
+#endif
+
 namespace matlab
 {
 
@@ -175,4 +179,46 @@ std::inplace_vector<T, 2> real_roots2(std::span<const T, 3> cs)
 template std::inplace_vector<float, 2> real_roots2(std::span<const float, 3> cs);
 template std::inplace_vector<double, 2> real_roots2(std::span<const double, 3> cs);
 
+#if MEADOW_HAS_EIGEN == 1
+std::vector<double> polyfit(
+  std::mdspan<const double, std::dextents<size_t, 1>, std::layout_stride> xs,
+  std::mdspan<const double, std::dextents<size_t, 1>, std::layout_stride> ys,
+  int degree
+)
+{
+    const auto n = iicast<int>(xs.extent(0));
+    CHECK(cmp_equal(ys.extent(0), n));
+    assert(n >= degree + 1);
+
+    // Create Vandermonde matrix (n x (degree+1))
+    Eigen::MatrixXd A(n, degree + 1);
+
+    for (int i = 0; i < n; ++i) {
+        const auto x = xs[i];
+        double xp = 1.0;
+        for (int p = 0; p <= degree; ++p) {
+            A(i, p) = xp;
+            xp *= x;
+        }
+    }
+
+    // Create vector y.
+    Eigen::VectorXd b(n);
+    for (int i = 0; i < n; ++i) {
+        b(i) = ys[i];
+    }
+
+    // Solve least squares: A * c = b
+    // Using Householder QR (numerically stable)
+    Eigen::VectorXd c = A.colPivHouseholderQr().solve(b);
+
+    // Copy to std::vector
+    std::vector<double> coeffs(sucast(c.size()));
+    for (int i = 0; i < c.size(); ++i) {
+        coeffs[sucast(c.size() - i - 1)] = c(i);
+    }
+
+    return coeffs;
+}
+#endif
 } // namespace matlab

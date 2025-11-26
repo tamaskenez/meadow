@@ -56,6 +56,7 @@ using std::array;
 using std::byte;
 using std::clamp;
 using std::cmp_equal;
+using std::cmp_greater_equal;
 using std::cmp_less;
 using std::cmp_less_equal;
 using std::cmp_not_equal;

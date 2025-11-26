@@ -3,7 +3,7 @@
 #include "meadow/matlab.h"
 
 #if MEADOW_HAS_EIGEN == 1
-  #include <Eigen/Dense>
+  #include "meadow/eigen_dense.h"
 #endif
 
 std::pair<double, double> extremumOfParabola(double ym1, double y0, double yp1)

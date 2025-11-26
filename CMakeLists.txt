@@ -37,6 +37,7 @@ set(dependencies
 
 set(ABSL_PACKAGE_NAME absl)
 set(ABSL_TARGET absl_base)
+set(EIGEN_TARGET Eigen3::Eigen)
 set(EIGEN_PACKAGE_NAME Eigen3)
 set(SDL_PACKAGE_NAME SDL3)
 set(SDL_TARGET SDL3::SDL3)
