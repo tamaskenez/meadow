@@ -199,6 +199,26 @@ T polyval(std::span<const T> cs, T x);
 template<class T>
 std::vector<T> polyder(std::span<const T> cs);
 
+namespace detail
+{
+template<class T>
+void polyder_noalloc_core(std::span<const T> cs, std::span<T> r);
+}
+
+template<size_t N, class T>
+    requires(N > 0)
+std::inplace_vector<T, N> polyder_noalloc(std::span<const T> cs)
+{
+    std::inplace_vector<T, N> r;
+    if (cs.size() <= 1) {
+        r.push_back(0.0);
+    } else {
+        r.resize(cs.size() - 1);
+        detail::polyder_noalloc_core(cs, span<T>(r.begin(), r.end()));
+    }
+    return r;
+}
+
 template<class T>
 std::inplace_vector<T, 2> real_roots2(std::span<const T, 3> cs);
 
@@ -209,4 +229,6 @@ std::vector<double> polyfit(
   int degree
 );
 #endif
+
+std::vector<double> linspace(double x1, double x2, size_t n);
 } // namespace matlab

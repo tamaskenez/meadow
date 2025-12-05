@@ -362,6 +362,20 @@ TEST(matlab, polyder)
     ASSERT_EQ(matlab::polyder(span<const double>(cs.data(), 4)), std::vector<double>({6.0, 6.0, 4.0}));
 }
 
+TEST(matlab, polyder_noalloc)
+{
+    array<double, 4> cs{2, 3, 4, 5};
+    ASSERT_EQ(matlab::polyder_noalloc<12>(span<const double>(cs.data(), 0)), (std::inplace_vector<double, 12>({0.0})));
+    ASSERT_EQ(matlab::polyder_noalloc<12>(span<const double>(cs.data(), 1)), (std::inplace_vector<double, 12>({0.0})));
+    ASSERT_EQ(matlab::polyder_noalloc<12>(span<const double>(cs.data(), 2)), (std::inplace_vector<double, 12>({2.0})));
+    ASSERT_EQ(
+      matlab::polyder_noalloc<12>(span<const double>(cs.data(), 3)), (std::inplace_vector<double, 12>({4.0, 3.0}))
+    );
+    ASSERT_EQ(
+      matlab::polyder_noalloc<12>(span<const double>(cs.data(), 4)), (std::inplace_vector<double, 12>({6.0, 6.0, 4.0}))
+    );
+}
+
 TEST(matlab, roots2)
 {
     {
@@ -392,19 +406,19 @@ TEST(matlab, polyfit)
     vector<double> xs = {-5, -3, 1, 2, 7, 11};
     vector<double> ys = {11, 13, 14, 7, 3, -2};
     {
-        auto p = matlab::polyfit(mdspan_from_data_size(xs), mdspan_from_data_size(ys), 0);
+        auto p = matlab::polyfit(mdspan_using_data_and_size(xs), mdspan_using_data_and_size(ys), 0);
         expect_near(p, vector<double>({7.666666666666668}), eps);
     }
     {
-        auto p = matlab::polyfit(mdspan_from_data_size(xs), mdspan_from_data_size(ys), 1);
+        auto p = matlab::polyfit(mdspan_using_data_and_size(xs), mdspan_using_data_and_size(ys), 1);
         expect_near(p, vector<double>({-0.921658986175115, 9.663594470046085}), eps);
     }
     {
-        auto p = matlab::polyfit(mdspan_from_data_size(xs), mdspan_from_data_size(ys), 2);
+        auto p = matlab::polyfit(mdspan_using_data_and_size(xs), mdspan_using_data_and_size(ys), 2);
         expect_near(p, vector<double>({-6.646772924152947e-02, -5.253642945037290e-01, 1.112024854000469e+01}), eps);
     }
     {
-        auto p = matlab::polyfit(mdspan_from_data_size(xs), mdspan_from_data_size(ys), 3);
+        auto p = matlab::polyfit(mdspan_using_data_and_size(xs), mdspan_using_data_and_size(ys), 3);
         expect_near(
           p,
           vector<double>(
@@ -414,7 +428,7 @@ TEST(matlab, polyfit)
         );
     }
     {
-        auto p = matlab::polyfit(mdspan_from_data_size(xs), mdspan_from_data_size(ys), 4);
+        auto p = matlab::polyfit(mdspan_using_data_and_size(xs), mdspan_using_data_and_size(ys), 4);
         expect_near(
           p,
           vector<double>(

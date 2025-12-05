@@ -22,6 +22,7 @@
 #include <functional>
 #include <initializer_list>
 #include <map>
+#include <mdspan>
 #include <memory>
 #include <numbers>
 #include <optional>
@@ -69,6 +70,7 @@ using std::holds_alternative;
 using std::initializer_list;
 using std::make_shared;
 using std::make_unique;
+using std::mdspan;
 using std::monostate;
 using std::nullopt;
 using std::optional;

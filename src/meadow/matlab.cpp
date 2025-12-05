@@ -143,20 +143,38 @@ template double polyval(std::span<const double> cs, double x);
 template<class T>
 std::vector<T> polyder(std::span<const T> cs)
 {
-    const auto N = cs.size();
-    if (N <= 1) {
-        return std::vector<T>({T(0)});
+    std::vector<T> r;
+    if (cs.size() <= 1) {
+        r.assign(1, 0.0);
+    } else {
+        r.resize(cs.size() - 1);
+        detail::polyder_noalloc_core(cs, std::span<T>(r.begin(), r.end()));
     }
-    std::vector<T> pd;
-    pd.reserve(cs.size() - 1);
-    for (size_t i : vi_iota<size_t>(0, N - 1)) {
-        pd.push_back((N - i - 1) * cs[i]);
-    }
-    return pd;
+    return r;
 }
 
 template std::vector<float> polyder(std::span<const float> cs);
 template std::vector<double> polyder(std::span<const double> cs);
+
+namespace detail
+{
+template<class T>
+void polyder_noalloc_core(std::span<const T> cs, std::span<T> r)
+{
+    const auto N = cs.size();
+    CHECK(N >= 1 && r.size() == N - 1);
+    if (N == 1) {
+        r.front() = 0.0;
+    } else {
+        for (size_t i : vi_iota<size_t>(0, N - 1)) {
+            r[i] = (N - i - 1) * cs[i];
+        }
+    }
+}
+
+template void polyder_noalloc_core(std::span<const float> cs, std::span<float> r);
+template void polyder_noalloc_core(std::span<const double> cs, std::span<double> r);
+} // namespace detail
 
 template<class T>
 std::inplace_vector<T, 2> real_roots2(std::span<const T, 3> cs)
@@ -221,4 +239,16 @@ std::vector<double> polyfit(
     return coeffs;
 }
 #endif
+
+std::vector<double> linspace(double x1, double x2, size_t n)
+{
+    std::vector<double> r;
+    r.reserve(n);
+    const double one_over_n_minus_1 = 1.0 / (n - 1);
+    for (size_t i = 0; i < n; ++i) {
+        r.push_back(std::lerp(x1, x2, i * one_over_n_minus_1));
+    }
+    return r;
+}
+
 } // namespace matlab
