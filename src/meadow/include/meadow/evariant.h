@@ -87,3 +87,7 @@
 #define EVARIANT_BREAK \
     }                  \
     break;
+
+#define EVARIANT_CASE2(VARIANT_VAR, NAMESPACE, ALT, ALT_VAR) \
+    case NAMESPACE::E::ALT:                                  \
+        if (auto& ALT_VAR = std::get<NAMESPACE::ALT>(VARIANT_VAR); true)
