@@ -32,7 +32,7 @@ template<class T>
 T mag2db(T x)
 {
     assert(x >= 0);
-    return x == 0 ? static_cast<T>(-INFINITY) : static_cast<T>(20) * log10(x);
+    return x <= 0 ? static_cast<T>(-INFINITY) : static_cast<T>(20) * log10(x);
 }
 
 template<class T>
@@ -40,7 +40,7 @@ template<class T>
 T pow2db(T x)
 {
     assert(x >= 0);
-    return x == 0 ? static_cast<T>(-INFINITY) : static_cast<T>(10) * log10(x);
+    return x <= 0 ? static_cast<T>(-INFINITY) : static_cast<T>(10) * log10(x);
 }
 
 template<class T>
