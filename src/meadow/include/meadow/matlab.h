@@ -37,7 +37,10 @@ T mag2db(T x)
 
 template<class T>
     requires std::floating_point<T>
-T pow2db(T x)
+T
+
+
+pow2db(T x)
 {
     assert(x >= 0);
     return x <= 0 ? static_cast<T>(-INFINITY) : static_cast<T>(10) * log10(x);
