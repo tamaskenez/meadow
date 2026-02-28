@@ -6,6 +6,7 @@
 #include <SDL3/SDL_gpu.h>
 #include <SDL3/SDL_pixels.h>
 #include <SDL3/SDL_render.h>
+#include <SDL3/SDL_timer.h>
 #include <SDL3/SDL_video.h>
 
 #if MEADOW_HAS_SDL_MIXER == 1

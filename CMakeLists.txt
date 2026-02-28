@@ -85,7 +85,7 @@ if(MEADOW_HAS_SDL_MIXER AND NOT MEADOW_HAS_SDL)
 endif()
 
 add_subdirectory(src)
-if(PROJECT_IS_TOP_LEVEL AND BUILD_TESTING)
+if(BUILD_TESTING)
     if(NOT TARGET magic_enum::magic_enum)
         find_package(magic_enum REQUIRED CONFIG)
     endif()

@@ -5,6 +5,8 @@
 #include <complex>
 #include <numbers>
 
+#pragma clang diagnostic ignored "-Wsign-conversion"
+
 namespace matlab
 {
 

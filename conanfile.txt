@@ -1,10 +1,10 @@
 [requires]
 gtest/1.17.0
 abseil/20250814.0
-eigen/3.4.0
+eigen/5.0.1
 magic_enum/0.9.7
-sdl/3.2.20
-boost/1.88.0
+sdl/3.4.0
+boost/1.90.0
 
 [generators]
 CMakeDeps
