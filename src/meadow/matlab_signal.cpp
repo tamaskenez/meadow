@@ -133,8 +133,9 @@ ButterworthCoeffs butter_bp(int order, double Wn1, double Wn2)
     for (int i = order; i < 2 * order; ++i)
         z_zeros[i] = {-1.0, 0.0};
 
-    // Normalize at the geometric center of the passband
-    const auto z_center = std::polar(1.0, std::numbers::pi * std::sqrt(Wn1 * Wn2));
+    // Normalize at the bilinear-transformed analog center frequency
+    const std::complex<double> s_center = {0.0, w0};
+    const auto z_center = (2.0 + s_center) / (2.0 - s_center);
     return make_coeffs(z_zeros, z_poles, z_center);
 }
 

@@ -1,3 +1,4 @@
+#include "matlab_butter_test_data.h"
 #include "meadow/matlab_signal.h"
 
 #include <gtest/gtest.h>
@@ -159,11 +160,15 @@ TEST(matlab_signal, butter_bp_coeffs_size)
 
 TEST(matlab_signal, butter_bp_center_gain)
 {
-    // Gain at the geometric center of the passband must equal 1.
+    // Gain at the bilinear-transformed analog center frequency must equal 1.
     for (int order : {1, 2, 3}) {
         const double wn1 = 0.2, wn2 = 0.6;
         auto r = matlab::butter(order, matlab::FilterType::BandPass{wn1, wn2});
-        const auto z_center = std::polar(1.0, std::numbers::pi * std::sqrt(wn1 * wn2));
+        const double w1 = 2.0 * std::tan(std::numbers::pi * wn1 / 2.0);
+        const double w2 = 2.0 * std::tan(std::numbers::pi * wn2 / 2.0);
+        const double w0 = std::sqrt(w1 * w2);
+        const std::complex<double> s_center = {0.0, w0};
+        const auto z_center = (2.0 + s_center) / (2.0 - s_center);
         EXPECT_NEAR(std::abs(eval_h(r, z_center)), 1.0, 1e-12);
     }
 }
@@ -212,5 +217,44 @@ TEST(matlab_signal, butter_bs_notch_attenuation)
         const std::complex<double> s_notch = {0.0, w0};
         const auto z_notch = (2.0 + s_notch) / (2.0 - s_notch);
         EXPECT_LT(std::abs(eval_h(r, z_notch)), 1e-10);
+    }
+}
+
+TEST(matlab_signal, butter_reference_data)
+{
+    // Iterate over Octave-generated reference data (see matlab_butter_test_data.h).
+    // Each group of 5 entries: args {order, low, high}, then concatenated b+a for LP, HP, BP, BS.
+    constexpr double eps = 1e-8;
+    const auto& d = matlab_butter_test_data;
+    for (size_t i = 0; i < d.size(); i += 5) {
+        const int order = static_cast<int>(d[i][0]);
+        const double low = d[i][1];
+        const double high = d[i][2];
+
+        const struct {
+            matlab::FilterType::V filter;
+            size_t idx;      // index into the group (1..4)
+            int coeff_order; // order used for coefficient count
+        } cases[] = {
+          {matlab::FilterType::LowPass{low},        1, order    },
+          {matlab::FilterType::HighPass{low},       2, order    },
+          {matlab::FilterType::BandPass{low, high}, 3, 2 * order},
+          {matlab::FilterType::BandStop{low, high}, 4, 2 * order},
+        };
+
+        for (const auto& c : cases) {
+            const auto& ref = d[i + c.idx];
+            const size_t n = static_cast<size_t>(c.coeff_order + 1);
+            ASSERT_EQ(ref.size(), 2 * n);
+
+            const auto r = matlab::butter(order, c.filter);
+            ASSERT_EQ(r.b.size(), n);
+            ASSERT_EQ(r.a.size(), n);
+
+            for (size_t k = 0; k < n; ++k) {
+                EXPECT_NEAR(r.b[k], ref[k], eps) << "b[" << k << "] mismatch, group " << i / 5;
+                EXPECT_NEAR(r.a[k], ref[n + k], eps) << "a[" << k << "] mismatch, group " << i / 5;
+            }
+        }
     }
 }
