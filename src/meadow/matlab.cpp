@@ -139,6 +139,7 @@ T polyval(std::span<const T> cs, T x)
 
 template float polyval(std::span<const float> cs, float x);
 template double polyval(std::span<const double> cs, double x);
+template std::complex<double> polyval(std::span<const std::complex<double>> cs, std::complex<double> x);
 
 template<class T>
 std::vector<T> polyder(std::span<const T> cs)

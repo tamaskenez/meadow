@@ -1,4 +1,5 @@
 #include "meadow/matlab_signal.h"
+#include "meadow/matlab.h"
 
 #include <cassert>
 #include <cmath>
@@ -48,12 +49,9 @@ std::vector<std::complex<double>> poly_from_roots(const std::vector<std::complex
     return poly;
 }
 
-std::complex<double> polyval(const std::vector<std::complex<double>>& c, std::complex<double> z)
+std::complex<double> polyval(const std::vector<std::complex<double>>& c, const std::complex<double>& z)
 {
-    std::complex<double> result = 0;
-    for (auto coeff : c)
-        result = result * z + coeff;
-    return result;
+    return matlab::polyval(span<const std::complex<double>>(c), z);
 }
 
 std::vector<double> real_coeffs(const std::vector<std::complex<double>>& c)
