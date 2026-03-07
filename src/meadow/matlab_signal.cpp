@@ -64,7 +64,7 @@ std::vector<double> real_coeffs(const std::vector<std::complex<double>>& c)
 
 // Assemble ButterworthCoeffs from digital zeros/poles and a reference point z_ref
 // at which |H(z_ref)| is normalized to 1.
-ButterworthCoeffs make_coeffs(
+TransferFunctionCoeffs make_coeffs(
   const std::vector<std::complex<double>>& z_zeros,
   const std::vector<std::complex<double>>& z_poles,
   std::complex<double> z_ref
@@ -78,7 +78,7 @@ ButterworthCoeffs make_coeffs(
     return {real_coeffs(b), real_coeffs(a)};
 }
 
-ButterworthCoeffs butter_lp(int order, double Wn)
+TransferFunctionCoeffs butter_lp(int order, double Wn)
 {
     auto poles = analog_proto_poles(order);
     const double wc = 2.0 * std::tan(std::numbers::pi * Wn / 2.0);
@@ -92,7 +92,7 @@ ButterworthCoeffs butter_lp(int order, double Wn)
     return make_coeffs(z_zeros, z_poles, {1.0, 0.0}); // normalize DC gain to 1
 }
 
-ButterworthCoeffs butter_hp(int order, double Wn)
+TransferFunctionCoeffs butter_hp(int order, double Wn)
 {
     auto poles = analog_proto_poles(order);
     const double wc = 2.0 * std::tan(std::numbers::pi * Wn / 2.0);
@@ -106,7 +106,7 @@ ButterworthCoeffs butter_hp(int order, double Wn)
     return make_coeffs(z_zeros, z_poles, {-1.0, 0.0}); // normalize Nyquist gain to 1
 }
 
-ButterworthCoeffs butter_bp(int order, double Wn1, double Wn2)
+TransferFunctionCoeffs butter_bp(int order, double Wn1, double Wn2)
 {
     auto proto = analog_proto_poles(order);
     const double w1 = 2.0 * std::tan(std::numbers::pi * Wn1 / 2.0);
@@ -137,7 +137,7 @@ ButterworthCoeffs butter_bp(int order, double Wn1, double Wn2)
     return make_coeffs(z_zeros, z_poles, z_center);
 }
 
-ButterworthCoeffs butter_bs(int order, double Wn1, double Wn2)
+TransferFunctionCoeffs butter_bs(int order, double Wn1, double Wn2)
 {
     auto proto = analog_proto_poles(order);
     const double w1 = 2.0 * std::tan(std::numbers::pi * Wn1 / 2.0);
@@ -170,11 +170,11 @@ ButterworthCoeffs butter_bs(int order, double Wn1, double Wn2)
 
 } // namespace
 
-ButterworthCoeffs butter(int order, const FilterType::V& filter)
+TransferFunctionCoeffs butter(int order, const FilterType::V& filter)
 {
     assert(order >= 1);
     return std::visit(
-      [order](auto&& f) -> ButterworthCoeffs {
+      [order](auto&& f) -> TransferFunctionCoeffs {
           using T = std::decay_t<decltype(f)>;
           if constexpr (std::is_same_v<T, FilterType::LowPass>)
               return butter_lp(order, f.cutoff);
