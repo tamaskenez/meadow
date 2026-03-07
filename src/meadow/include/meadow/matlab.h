@@ -196,8 +196,8 @@ void operator/=(vector<double>& xs, const double y);
 template<class T>
 std::array<T, 2> polyfit1(std::span<const T> xs, std::span<const T> ys);
 
-template<class T>
-T polyval(std::span<const T> cs, T x);
+template<class C, class X>
+decltype(std::declval<C>() * std::declval<X>()) polyval(std::span<const C> cs, X x);
 
 template<class T>
 std::vector<T> polyder(std::span<const T> cs);

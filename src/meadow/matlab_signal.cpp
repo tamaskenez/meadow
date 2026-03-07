@@ -189,4 +189,10 @@ TransferFunctionCoeffs butter(int order, const FilterType::V& filter)
     );
 }
 
+std::complex<double> freqz(std::span<const double> b, std::span<const double> a, double w)
+{
+    const std::complex<double> z_inv = std::exp(std::complex<double>(0.0, w));
+    return polyval(b, z_inv) / polyval(a, z_inv);
+}
+
 } // namespace matlab

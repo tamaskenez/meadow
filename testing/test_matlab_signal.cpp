@@ -18,7 +18,7 @@ void expect_near(const std::vector<double>& x, const std::vector<double>& y, dou
 }
 
 // Evaluate H(z) = sum_b / sum_a for z = exp(j*w).
-std::complex<double> eval_h(const matlab::ButterworthCoeffs& r, std::complex<double> z)
+std::complex<double> eval_h(const matlab::TransferFunctionCoeffs& r, std::complex<double> z)
 {
     std::complex<double> num = 0, den = 0;
     for (auto c : r.b)
@@ -257,4 +257,34 @@ TEST(matlab_signal, butter_reference_data)
             }
         }
     }
+}
+
+template<class T>
+using complex = std::complex<T>;
+
+namespace
+{
+void assert_near(complex<double> a, complex<double> b, double eps)
+{
+    ASSERT_NEAR(std::real(a), std::real(b), eps);
+    ASSERT_NEAR(std::imag(a), std::imag(b), eps);
+}
+} // namespace
+
+TEST(matlab_signal, freqz)
+{
+    auto tf = matlab::butter(2, matlab::FilterType::LowPass{0.25});
+    auto r0 = matlab::freqz(tf.b, tf.a, 0.0);
+    auto r1 = matlab::freqz(tf.b, tf.a, num::pi * 0.125);
+    auto r2 = matlab::freqz(tf.b, tf.a, num::pi * 0.25);
+    auto r3 = matlab::freqz(tf.b, tf.a, num::pi * 0.375);
+    const auto e0 = complex<double>(1, 0);
+    const auto e1 = complex<double>(0.730541366470620, -0.644836760840970);
+    const auto e2 = complex<double>(0.000000000000000, -0.707106781186547);
+    const auto e3 = complex<double>(-0.206165241813622, -0.293554468133657);
+    constexpr double eps = 1e-15;
+    assert_near(r0, e0, eps);
+    assert_near(r1, e1, eps);
+    assert_near(r2, e2, eps);
+    assert_near(r3, e3, eps);
 }

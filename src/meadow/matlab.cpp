@@ -123,14 +123,15 @@ array<T, 2> polyfit1(span<const T> xs, span<const T> ys)
 template array<float, 2> polyfit1(span<const float> xs, span<const float> ys);
 template array<double, 2> polyfit1(span<const double> xs, span<const double> ys);
 
-template<class T>
-T polyval(std::span<const T> cs, T x)
+template<class C, class X>
+decltype(std::declval<C>() * std::declval<X>()) polyval(std::span<const C> cs, X x)
 {
+    using R = decltype(std::declval<C>() * std::declval<X>());
     const auto N = cs.size();
     if (N == 0) {
-        return T(0);
+        return R(0);
     }
-    T s = cs.front();
+    R s = cs.front();
     for (size_t i = 1; i < N; ++i) {
         s = (s * x) + cs[i];
     }
@@ -140,6 +141,7 @@ T polyval(std::span<const T> cs, T x)
 template float polyval(std::span<const float> cs, float x);
 template double polyval(std::span<const double> cs, double x);
 template std::complex<double> polyval(std::span<const std::complex<double>> cs, std::complex<double> x);
+template std::complex<double> polyval(std::span<const double> cs, std::complex<double> x);
 
 template<class T>
 std::vector<T> polyder(std::span<const T> cs)

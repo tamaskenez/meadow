@@ -48,4 +48,9 @@ struct TransferFunctionCoeffs {
 // BP and BS apply the LP-to-BP/BS transformation, producing a filter of order 2*order.
 TransferFunctionCoeffs butter(int order, const FilterType::V& filter);
 
+// Return the frequency response of the specified digital filter at the normalized frequency `w`.
+// NOTE: following MATLAB conventions, `w` is in rad/s (positive frequencies: 0..pi),
+// unlike other functions (e.g. `butter`) where the frequency is
+// normalized to Nyquist (positive frequencies: 0..1)
+std::complex<double> freqz(std::span<const double> b, std::span<const double> a, double w);
 } // namespace matlab
