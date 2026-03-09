@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cassert>
+#include <optional>
 #include <span>
 #include <variant>
 #include <vector>
@@ -53,4 +54,11 @@ TransferFunctionCoeffs butter(int order, const FilterType::V& filter);
 // unlike other functions (e.g. `butter`) where the frequency is
 // normalized to Nyquist (positive frequencies: 0..1)
 std::complex<double> freqz(std::span<const double> b, std::span<const double> a, double w);
+
+// Convert the analog filter `H(s) = b / a` to a discrete time system using the bilinear "Tustin" approximation with
+// sample rate `fs` and optional frequency prewarping ('fp').
+// Corresponds to one of the signatures of MATLAB's `bilinear` function.
+TransferFunctionCoeffs
+bilinear(std::span<const double> b, std::span<const double> a, double fs, std::optional<double> fp);
+
 } // namespace matlab

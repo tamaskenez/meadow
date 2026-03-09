@@ -168,6 +168,17 @@ TransferFunctionCoeffs butter_bs(int order, double Wn1, double Wn2)
     return make_coeffs(z_zeros, z_poles, {1.0, 0.0}); // normalize DC gain to 1
 }
 
+std::vector<double> poly_mul(const std::vector<double>& p, const std::vector<double>& q)
+{
+    std::vector<double> result(p.size() + q.size() - 1, 0.0);
+    for (size_t i = 0; i < p.size(); ++i) {
+        for (size_t j = 0; j < q.size(); ++j) {
+            result[i + j] += p[i] * q[j];
+        }
+    }
+    return result;
+}
+
 } // namespace
 
 TransferFunctionCoeffs butter(int order, const FilterType::V& filter)
@@ -193,6 +204,63 @@ std::complex<double> freqz(std::span<const double> b, std::span<const double> a,
 {
     const std::complex<double> z_inv = std::exp(std::complex<double>(0.0, w));
     return polyval(b, z_inv) / polyval(a, z_inv);
+}
+
+TransferFunctionCoeffs
+bilinear(std::span<const double> b, std::span<const double> a, double fs, std::optional<double> fp)
+{
+    // Prewarping factor λ: s = λ*(z-1)/(z+1).
+    // With fp: match exact frequency response at fp Hz.
+    // Without fp: standard bilinear (λ = 2*fs).
+    const double lam =
+      fp.has_value() ? 2.0 * std::numbers::pi * fp.value() / std::tan(std::numbers::pi * fp.value() / fs) : 2.0 * fs;
+
+    const int nb = static_cast<int>(b.size());
+    const int na = static_cast<int>(a.size());
+    const int n = std::max(nb, na) - 1; // filter order
+
+    // Pad numerator and denominator to the same order n (prepend zeros).
+    std::vector<double> bp(n + 1, 0.0), ap(n + 1, 0.0);
+    std::copy(b.begin(), b.end(), bp.begin() + (n + 1 - nb));
+    std::copy(a.begin(), a.end(), ap.begin() + (n + 1 - na));
+
+    // Precompute (z-1)^k and (z+1)^k for k = 0..n.
+    std::vector<std::vector<double>> zm1(n + 1), zp1(n + 1);
+    zm1[0] = zp1[0] = {1.0};
+    for (int k = 1; k <= n; ++k) {
+        zm1[k] = poly_mul(zm1[k - 1], {1.0, -1.0});
+        zp1[k] = poly_mul(zp1[k - 1], {1.0, 1.0});
+    }
+
+    // Transform P(s) to a z-domain polynomial of degree n:
+    // P_z(z) = sum_{k=0}^{n} p[n-k] * λ^k * (z-1)^k * (z+1)^(n-k)
+    auto transform = [&](const std::vector<double>& p) {
+        std::vector<double> result(n + 1, 0.0);
+        double lam_k = 1.0;
+        for (int k = 0; k <= n; ++k) {
+            const auto term = poly_mul(zm1[k], zp1[n - k]);
+            const double coeff = p[n - k] * lam_k;
+            for (int i = 0; i <= n; ++i) {
+                result[i] += coeff * term[i];
+            }
+            lam_k *= lam;
+        }
+        return result;
+    };
+
+    auto bz = transform(bp);
+    auto az = transform(ap);
+
+    // Normalize so that az[0] = 1.
+    const double a0 = az[0];
+    for (auto& c : bz) {
+        c /= a0;
+    }
+    for (auto& c : az) {
+        c /= a0;
+    }
+
+    return {bz, az};
 }
 
 } // namespace matlab

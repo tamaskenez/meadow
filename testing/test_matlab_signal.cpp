@@ -288,3 +288,72 @@ TEST(matlab_signal, freqz)
     assert_near(r2, e2, eps);
     assert_near(r3, e3, eps);
 }
+
+// ---- bilinear ----------------------------------------------------------
+// Reference values generated with MATLAB: [b,a] = bilinear(b_a, a_a, fs)
+// and [b,a] = bilinear(b_a, a_a, fs, fp) for the prewarped cases.
+
+TEST(matlab_signal, bilinear_order1_no_prewarp)
+{
+    // MATLAB: [b,a] = bilinear([1], [1,1], 44100)
+    const double b_a[] = {1.0};
+    const double a_a[] = {1.0, 1.0};
+    auto r = matlab::bilinear(b_a, a_a, 44100.0, std::nullopt);
+    ASSERT_EQ(r.b.size(), 2u);
+    ASSERT_EQ(r.a.size(), 2u);
+    constexpr double eps = 1e-15;
+    expect_near(r.b, {1.13377399348912888399e-05, 1.13377399348912888399e-05}, eps);
+    expect_near(r.a, {1.00000000000000000000e+00, -9.99977324520130106400e-01}, eps);
+}
+
+TEST(matlab_signal, bilinear_order2_no_prewarp)
+{
+    // MATLAB: [b,a] = bilinear([1], [1,sqrt(2),1], 8000)
+    const double b_a[] = {1.0};
+    const double a_a[] = {1.0, std::numbers::sqrt2, 1.0};
+    auto r = matlab::bilinear(b_a, a_a, 8000.0, std::nullopt);
+    ASSERT_EQ(r.b.size(), 3u);
+    ASSERT_EQ(r.a.size(), 3u);
+    constexpr double eps = 1e-14;
+    expect_near(r.b, {3.90590471077700840397e-09, 7.81180964359862173296e-09, 3.90590459975470594145e-09}, eps);
+    expect_near(r.a, {1.00000000000000000000e+00, -1.99982322330539386002e+00, 9.99823238929012925169e-01}, eps);
+}
+
+TEST(matlab_signal, bilinear_order2_nontrivial_numerator_no_prewarp)
+{
+    // MATLAB: [b,a] = bilinear([1,2], [1,3,2], 1000)
+    const double b_a[] = {1.0, 2.0};
+    const double a_a[] = {1.0, 3.0, 2.0};
+    auto r = matlab::bilinear(b_a, a_a, 1000.0, std::nullopt);
+    ASSERT_EQ(r.b.size(), 3u);
+    ASSERT_EQ(r.a.size(), 3u);
+    constexpr double eps = 1e-14;
+    expect_near(r.b, {4.99750124937525797009e-04, 9.98501747950797380327e-07, -4.98751623189352955023e-04}, eps);
+    expect_near(r.a, {1.00000000000000000000e+00, -1.99700249775212279602e+00, 9.97004494755619030677e-01}, eps);
+}
+
+TEST(matlab_signal, bilinear_order1_prewarp)
+{
+    // MATLAB: [b,a] = bilinear([1], [1,1], 8000, 1000)
+    const double b_a[] = {1.0};
+    const double a_a[] = {1.0, 1.0};
+    auto r = matlab::bilinear(b_a, a_a, 8000.0, 1000.0);
+    ASSERT_EQ(r.b.size(), 2u);
+    ASSERT_EQ(r.a.size(), 2u);
+    constexpr double eps = 1e-15;
+    expect_near(r.b, {6.59197902421748693769e-05, 6.59197902421748693769e-05}, eps);
+    expect_near(r.a, {1.00000000000000000000e+00, -9.99868160419515761284e-01}, eps);
+}
+
+TEST(matlab_signal, bilinear_order2_prewarp)
+{
+    // MATLAB: [b,a] = bilinear([1], [1,sqrt(2),1], 1000, 100)
+    const double b_a[] = {1.0};
+    const double a_a[] = {1.0, std::numbers::sqrt2, 1.0};
+    auto r = matlab::bilinear(b_a, a_a, 1000.0, 100.0);
+    ASSERT_EQ(r.b.size(), 3u);
+    ASSERT_EQ(r.a.size(), 3u);
+    constexpr double eps = 1e-14;
+    expect_near(r.b, {2.67223550176609592199e-07, 5.34447100131174579474e-07, 2.67223550287631894662e-07}, eps);
+    expect_near(r.a, {1.00000000000000000000e+00, -1.99853734787105885573e+00, 9.98538416765259451147e-01}, eps);
+}
