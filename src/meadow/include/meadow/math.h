@@ -95,6 +95,13 @@ bool in_co_range(const X& x, const L& lo, const H& hi)
     return lo <= x && x < hi;
 }
 
+template<class X, class L, class H>
+bool in_oo_range(const X& x, const L& lo, const H& hi)
+{
+    assert(lo <= hi); // Note: lo == hi is allowed but result is always false.
+    return lo < x && x < hi;
+}
+
 template<class T>
     requires std::floating_point<T>
 T minus_round(T x)
