@@ -47,6 +47,10 @@ public:
     {
         return valid_;
     }
+    void invalidate()
+    {
+        valid_ = false;
+    }
 
 private:
     bool valid_ = true;
