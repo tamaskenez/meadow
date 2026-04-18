@@ -60,15 +60,14 @@
  *     switch(enum_of(v)) {
  *         case Event::E::A:
  *             break;
- *         EVARIANT_CASE(v, Event, B, x)
+ *         EVARIANT_CASE(v, Event, B, x) {
  *             int a = x.a;
- *         EVARIANT_BREAK
+ *         } break;
  *
  * In your .clang-format you need this to properly format the macro:
  *
  *     Macros:
- *     - EVARIANT_CASE(w, n, a, v)=case n:{
- *     - EVARIANT_BREAK=}
+ *     - "EVARIANT_CASE(w, n, a, v)=case n:"
  *
  */
 
@@ -82,6 +81,6 @@
         return E(v.index());             \
     }
 
-#define EVARIANT_CASE2(VARIANT_VAR, NAMESPACE, ALT, ALT_VAR) \
-    case NAMESPACE::E::ALT:                                  \
+#define EVARIANT_CASE(VARIANT_VAR, NAMESPACE, ALT, ALT_VAR) \
+    case NAMESPACE::E::ALT:                                 \
         if (auto& ALT_VAR = std::get<NAMESPACE::ALT>(VARIANT_VAR); true)

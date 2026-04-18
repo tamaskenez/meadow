@@ -1,6 +1,6 @@
 [requires]
 gtest/1.17.0
-abseil/20250814.0
+abseil/20260107.1
 eigen/5.0.1
 magic_enum/0.9.7
 sdl/3.4.0
@@ -8,6 +8,7 @@ boost/1.90.0
 
 [generators]
 CMakeDeps
+CMakeToolchain
 
 [options]
 boost/*:system_no_deprecated=True

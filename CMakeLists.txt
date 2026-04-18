@@ -1,5 +1,11 @@
-cmake_minimum_required(VERSION 3.29)
+cmake_minimum_required(VERSION 3.31)
 project(meadow)
+
+# Conan 2.x CMakeDeps creates per-config targets (CONAN_LIB::*_RELEASE/_DEBUG) with only
+# IMPORTED_LOCATION_<CONFIG> set. CMake 4.x validates all imported targets at configure
+# time, erroring on missing locations for other configs. Setting CMP0111 OLD turns this
+# back into a warning — Conan's config files select the correct variant at link time.
+cmake_policy(SET CMP0111 OLD)
 
 if(PROJECT_IS_TOP_LEVEL)
     if(NOT CMAKE_PREFIX_PATH)
@@ -23,6 +29,9 @@ if(PROJECT_IS_TOP_LEVEL)
     include(${CMAKE_SOURCE_DIR}/cmake/warnings_msvc.cmake)
 
     set(dependency_default_requirement ON)
+
+    # Workaround for SDK3_mixerConfig.cmake: include(PkgConfigHelpers)
+    list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/_d/SDL_mixer/s/cmake")
 else()
     set(dependency_default_requirement AUTO)
 endif()
@@ -33,6 +42,7 @@ set(dependencies
     SDL
     SDL_MIXER
     BOOST
+    MAGIC_ENUM
 )
 
 set(ABSL_PACKAGE_NAME absl)
@@ -44,6 +54,7 @@ set(SDL_TARGET SDL3::SDL3)
 set(SDL_MIXER_PACKAGE_NAME SDL3_mixer)
 set(SDL_MIXER_TARGET SDL3_mixer::SDL3_mixer)
 set(BOOST_PACKAGE_NAME Boost)
+set(MAGIC_ENUM_PACKAGE_NAME magic_enum)
 
 foreach(dependency IN LISTS dependencies)
     set(MEADOW_WITH_${dependency} ${dependency_default_requirement} CACHE STRING "Build with ${dependency}")
