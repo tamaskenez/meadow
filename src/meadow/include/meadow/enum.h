@@ -1,7 +1,7 @@
 #pragma once
 
 #if MEADOW_HAS_MAGIC_ENUM
-#include <magic_enum/magic_enum.hpp>
+  #include <magic_enum/magic_enum.hpp>
 #endif
 
 #include <optional>

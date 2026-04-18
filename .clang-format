@@ -30,5 +30,5 @@ PointerAlignment: Left
 PPIndentWidth:   2
 SpaceAfterTemplateKeyword: false
 Macros:
-  - "EVARIANT_CASE2(w, n, a, v)=case n:"
+  - "EVARIANT_CASE(w, n, a, v)=case n:"
 IfMacros: [IF_MATCH]

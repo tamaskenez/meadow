@@ -22,11 +22,9 @@ TEST(evariant, T1)
     switch (enum_of(v)) {
     case MyVariant::E::Choice1:
         break;
-        EVARIANT_CASE(v, MyVariant, Choice2, x)
-        {
-            q = x.a;
-        }
-        break;
+    EVARIANT_CASE(v, MyVariant, Choice2, x) {
+        q = x.a;
+    } break;
     case MyVariant::E::Choice3:
         break;
     }
@@ -42,11 +40,9 @@ TEST(evariant, T2)
     case MyVariant::E::Choice1:
         q = 0;
         break;
-        EVARIANT_CASE(v, MyVariant, Choice2, x)
-        {
-            q = x.a;
-        }
-        break;
+    EVARIANT_CASE(v, MyVariant, Choice2, x) {
+        q = x.a;
+    } break;
     case MyVariant::E::Choice3:
         q = 10;
         break;
