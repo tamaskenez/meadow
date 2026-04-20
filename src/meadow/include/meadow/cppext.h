@@ -181,6 +181,42 @@ constexpr R iceil(T x)
     return detail::float_to_int_cast_core<R>(ceil(x));
 }
 
+namespace detail
+{
+template<class R, class T>
+    requires std::integral<R> && std::floating_point<T>
+constexpr std::optional<R> try_float_to_int_cast_core(T fx)
+{
+    if (!std::isnan(fx) && static_cast<T>(std::numeric_limits<R>::lowest()) <= fx
+        && fx <= static_cast<T>(std::numeric_limits<R>::max())) {
+        return static_cast<R>(fx);
+    } else {
+        return std::nullopt;
+    }
+}
+} // namespace detail
+
+template<class R, class T>
+    requires std::integral<R> && std::floating_point<T>
+constexpr std::optional<R> try_ifloor(T x)
+{
+    return detail::try_float_to_int_cast_core<R>(floor(x));
+}
+
+template<class R, class T>
+    requires std::integral<R> && std::floating_point<T>
+constexpr std::optional<R> try_iround(T x)
+{
+    return detail::try_float_to_int_cast_core<R>(round(x));
+}
+
+template<class R, class T>
+    requires std::integral<R> && std::floating_point<T>
+constexpr std::optional<R> try_iceil(T x)
+{
+    return detail::try_float_to_int_cast_core<R>(ceil(x));
+}
+
 template<class To, class From>
     requires std::integral<To> && std::integral<From>
 constexpr To iicast(From f)
