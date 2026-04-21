@@ -355,3 +355,13 @@ auto vi_iota(B b, E e)
 {
     return vi::iota(iicast<R>(b), iicast<R>(e));
 }
+
+template<class T>
+auto to_void_ptr(T* p)
+{
+    if constexpr (std::is_const_v<T>) {
+        return static_cast<const void*>(p);
+    } else {
+        return static_cast<void*>(p);
+    }
+}
