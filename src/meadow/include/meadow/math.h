@@ -91,7 +91,11 @@ bool in_cc_range(const X& x, const L& lo, const H& hi)
 template<class X, class L, class H>
 bool in_co_range(const X& x, const L& lo, const H& hi)
 {
-    assert(lo <= hi);
+    if constexpr (std::is_integral_v<L> && std::is_integral_v<H>) {
+        assert(cmp_less_equal(lo, hi));
+    } else {
+        assert(lo <= hi);
+    }
     return lo <= x && x < hi;
 }
 
