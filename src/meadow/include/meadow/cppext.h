@@ -365,3 +365,31 @@ auto to_void_ptr(T* p)
         return static_cast<void*>(p);
     }
 }
+
+namespace detail
+{
+// Compute x - y, assert when the result is not representable in an int64_t.
+inline int64_t signed_subtract_core(int64_t x, int64_t y)
+{
+    assert(!(y > 0 && x < INT64_MIN + y));
+    assert(!(y < 0 && x > INT64_MAX + y));
+    return x - y;
+}
+} // namespace detail
+
+// Accept any combination of integral types (signed/unsigned) and compute the appropriate result type.
+// assert for UB.
+template<class X, class Y>
+    requires std::integral<X> && std::integral<Y>
+auto signed_subtract(X x, Y y)
+{
+    if constexpr (sizeof(X) == 1 && sizeof(Y) == 1) {
+        return static_cast<int16_t>(x) - static_cast<int16_t>(y);
+    } else if constexpr (sizeof(X) <= 2 && sizeof(Y) <= 2) {
+        return static_cast<int32_t>(x) - static_cast<int32_t>(y);
+    } else if constexpr (sizeof(X) <= 4 && sizeof(Y) <= 4) {
+        return static_cast<int64_t>(x) - static_cast<int64_t>(y);
+    } else {
+        return detail::signed_subtract_core(iicast<int64_t>(x), iicast<int64_t>(y));
+    }
+}

@@ -88,3 +88,38 @@ TEST(cppext, remove_postfix)
         expect_same_span(s0.subspan(0, 3 - i), s1);
     }
 }
+
+template<class X, class Y>
+void test_signed_subtract_2()
+{
+    const auto x_min = std::numeric_limits<X>::min();
+    const auto x_max = std::numeric_limits<X>::max();
+    const auto y_min = std::numeric_limits<Y>::min();
+    const auto y_max = std::numeric_limits<Y>::max();
+    ASSERT_EQ(signed_subtract(x_min, y_max), iicast<int64_t>(x_min) - iicast<int64_t>(y_max));
+    ASSERT_EQ(signed_subtract(x_max, y_min), iicast<int64_t>(x_max) - iicast<int64_t>(y_min));
+}
+
+template<class X>
+void test_signed_subtract_1()
+{
+    test_signed_subtract_2<X, uint8_t>();
+    test_signed_subtract_2<X, uint16_t>();
+    test_signed_subtract_2<X, uint32_t>();
+    test_signed_subtract_2<X, int8_t>();
+    test_signed_subtract_2<X, int16_t>();
+    test_signed_subtract_2<X, int32_t>();
+}
+
+TEST(cppext, signed_subtract)
+{
+    test_signed_subtract_1<uint8_t>();
+    test_signed_subtract_1<uint16_t>();
+    test_signed_subtract_1<uint32_t>();
+    test_signed_subtract_1<int8_t>();
+    test_signed_subtract_1<int16_t>();
+    test_signed_subtract_1<int32_t>();
+
+    ASSERT_EQ(signed_subtract(uint64_t(3), uint64_t(2)), 1);
+    ASSERT_EQ(signed_subtract(uint64_t(2), uint64_t(3)), -1);
+}
