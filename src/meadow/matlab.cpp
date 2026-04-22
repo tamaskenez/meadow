@@ -108,7 +108,7 @@ array<T, 2> polyfit1(span<const T> xs, span<const T> ys)
         sy += y;
         sxy += x * y;
     }
-    auto det = N * sx2 - square(sx);
+    auto det = ifcast<T>(N) * sx2 - square(sx);
     // [sx2 -sx
     //  -sx  N] / det
     //
@@ -170,7 +170,7 @@ void polyder_noalloc_core(std::span<const T> cs, std::span<T> r)
         r.front() = 0.0;
     } else {
         for (size_t i : vi_iota<size_t>(0, N - 1)) {
-            r[i] = (N - i - 1) * cs[i];
+            r[i] = ifcast<T>(N - i - 1) * cs[i];
         }
     }
 }
@@ -247,9 +247,9 @@ std::vector<double> linspace(double x1, double x2, size_t n)
 {
     std::vector<double> r;
     r.reserve(n);
-    const double one_over_n_minus_1 = 1.0 / (n - 1);
+    const double one_over_n_minus_1 = 1.0 / ifcast<double>(n - 1);
     for (size_t i = 0; i < n; ++i) {
-        r.push_back(std::lerp(x1, x2, i * one_over_n_minus_1));
+        r.push_back(std::lerp(x1, x2, ifcast<double>(i) * one_over_n_minus_1));
     }
     return r;
 }

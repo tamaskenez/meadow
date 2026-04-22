@@ -121,7 +121,7 @@ R mean(X&& xs)
                  return a + static_cast<R>(b);
              }
            )
-         / std::size(xs);
+         / ifcast<R>(std::size(xs));
 }
 
 template<class X>
@@ -175,7 +175,7 @@ T nextpow2(T x)
             return static_cast<T>(sizeof(T) * 8 - 1);
         }
         if (x < 0) {
-            x = -x;
+            x = iicast<T>(-x);
         }
         const auto ux = static_cast<std::make_unsigned_t<T>>(x);
         return static_cast<T>(nextpow2(ux));

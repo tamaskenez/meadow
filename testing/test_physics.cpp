@@ -85,7 +85,7 @@ static void test_physics_integrators_spring_mass(const double m, const double c,
     }
 
     for (size_t n : vi::iota(0u, N)) {
-        const double t = n * dt;
+        const double t = ifcast<double>(n) * dt;
         // Analytics solution.
         double x_t = NAN;
         double v_t = NAN;
