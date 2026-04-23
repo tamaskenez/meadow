@@ -73,9 +73,9 @@ T modulo(T x, T y)
 }
 
 // Negative x will be correctly handled, resulting in "modulo" not remainder. Undefined behavior if y <= 0.
-template<class T>
-    requires std::integral<T>
-T modulo(T x, T y)
+template<class X, class Y>
+    requires std::integral<X> && std::integral<Y>
+auto modulo(X x, Y y)
 {
     assert(y > 0);
     return ((x % y) + y) % y;
