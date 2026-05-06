@@ -101,6 +101,7 @@ inline void __inline_void_function_with_empty_body__() {}
 #define NOP __inline_void_function_with_empty_body__()
 
 #define UNUSED [[maybe_unused]]
+#define NODIS [[nodiscard]]
 
 #define PP_CONCAT2(A, B) A##B
 #define PP_CONCAT(A, B) PP_CONCAT2(A, B)
@@ -136,14 +137,6 @@ template<typename... Ts, typename Variant>
 auto switch_variant(Variant&& variant, Ts&&... ts)
 {
     return std::visit(overloaded{std::forward<Ts>(ts)...}, std::forward<Variant>(variant));
-}
-
-template<typename T>
-decltype(auto) MUST_MOVE(T&& t)
-{
-    static_assert(std::is_move_constructible_v<std::remove_reference_t<T>>, "Type must be move constructible");
-    static_assert(!std::is_const_v<std::remove_reference_t<T>>, "Cannot move a const object");
-    return std::move(t);
 }
 
 namespace detail
