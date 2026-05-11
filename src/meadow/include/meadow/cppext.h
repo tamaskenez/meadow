@@ -342,6 +342,20 @@ void remove_postfix(std::span<T>& s, size_t n)
     s = span(s.begin(), s.end() - uscast(n));
 }
 
+template<class T>
+std::span<T> without_prefix(std::span<T> s, size_t n)
+{
+    remove_prefix(s, n);
+    return s;
+}
+
+template<class T>
+std::span<T> without_postfix(std::span<T> s, size_t n)
+{
+    remove_postfix(s, n);
+    return s;
+}
+
 template<class R, class B, class E>
     requires std::integral<R> && std::integral<B> && std::integral<E>
 auto vi_iota(B b, E e)
