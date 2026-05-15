@@ -19,7 +19,7 @@ std::optional<std::decay_t<E>> enum_cast_from_any_int(T t)
 
 template<class E, class T>
     requires std::floating_point<T>
-std::optional<std::decay_t<E>> enum_cast_from_float(T t)
+std::optional<std::decay_t<E>> enum_cast_from_round_float(T t)
 {
     using ut = std::underlying_type_t<E>;
     if (auto e = try_iround<ut>(t)) {
