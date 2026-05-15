@@ -82,9 +82,15 @@ auto modulo(X x, Y y)
 }
 
 template<class X, class L, class H>
-bool in_cc_range(const X& x, const L& lo, const H& hi)
+constexpr bool in_cc_range(const X& x, const L& lo, const H& hi)
 {
-    assert(lo <= hi);
+    if consteval {
+        if (!(lo <= hi)) {
+            throw std::invalid_argument("Invalid range: lo must be less than or equal to hi");
+        }
+    } else {
+        assert(lo <= hi);
+    }
     return lo <= x && x <= hi;
 }
 
@@ -111,4 +117,11 @@ template<class T>
 T minus_round(T x)
 {
     return x - round(x);
+}
+
+template<class X>
+    requires std::floating_point<X>
+constexpr bool equal_epsilon(X x, X y, X eps)
+{
+    return in_cc_range(x - y, -eps, eps);
 }
