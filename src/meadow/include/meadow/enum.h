@@ -2,6 +2,7 @@
 
 #if MEADOW_HAS_MAGIC_ENUM
   #include <magic_enum/magic_enum.hpp>
+  #include <magic_enum/magic_enum_containers.hpp>
 #endif
 
 #include <optional>
@@ -27,5 +28,51 @@ std::optional<std::decay_t<E>> enum_cast_from_round_float(T t)
     } else {
         return std::nullopt;
     }
+}
+
+// class Flags allows enums to be used as flags.
+// E must be a scoped enum.
+//
+// The explicit underlying values assigned to the enum values are ignored. No need to assign powers-of-2.
+// Moreover, assigning underlying values above MAGIC_ENUM_RANGE_MAX (default: 127) will break the operations since
+// magic_enum can't index values above that.
+template<class E>
+    requires magic_enum::is_scoped_enum_v<E>
+class Flags
+{
+public:
+    constexpr Flags() = default;
+    constexpr Flags(E e)
+        : bitset({e})
+    {
+    }
+    constexpr bool operator&(E e) const
+    {
+        return bitset.test(e);
+    }
+    constexpr auto operator|(E e) const
+    {
+        auto result = *this;
+        result.bitset.set(e);
+        return result;
+    }
+    constexpr bool any() const
+    {
+        return bitset.any();
+    }
+    constexpr bool all() const
+    {
+        return bitset.all();
+    }
+
+private:
+    magic_enum::containers::bitset<E> bitset;
+};
+
+template<class E>
+    requires magic_enum::is_scoped_enum_v<E>
+constexpr Flags<E> operator|(E x, E y)
+{
+    return Flags<E>(x) | y;
 }
 #endif

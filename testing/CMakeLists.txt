@@ -10,4 +10,5 @@ target_link_libraries(test_meadow PRIVATE
     GTest::gtest_main
     magic_enum::magic_enum
 )
-add_test(NAME test_meadow COMMAND test_meadow)
+include(GoogleTest)
+gtest_discover_tests(test_meadow)
