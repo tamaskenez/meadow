@@ -125,3 +125,13 @@ constexpr bool equal_epsilon(X x, X y, X eps)
 {
     return in_cc_range(x - y, -eps, eps);
 }
+
+// Round to specified decimal places after the decimal point (num_digits >= 0).
+// If num_digits < 0, rounds to multiplies of pow(10, -num_digits).
+template<class F>
+    requires std::floating_point<F>
+F round_to_digits(F x, int num_digits)
+{
+    const auto unit = pow(10.0, num_digits);
+    return ffcast<F>(round(x * unit) / unit);
+}
