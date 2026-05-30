@@ -442,3 +442,35 @@ TEST(matlab, polyfit)
         );
     }
 }
+
+TEST(matlab, sinc)
+{
+    // Expected values for x = 10^i, i in [-10, -1] (sinc well away from zero)
+    constexpr array k_expected = {
+      1.000000000000000e+00,
+      1.000000000000000e+00,
+      9.999999999999998e-01,
+      9.999999999999835e-01,
+      9.999999999983551e-01,
+      9.999999998355066e-01,
+      9.999999835506593e-01,
+      9.999983550667449e-01,
+      9.998355147105485e-01,
+      9.836316430834660e-01
+    };
+
+    static_assert(k_expected.size() == 10);
+    ASSERT_EQ(matlab::sinc(0.0), 1.0);
+    ASSERT_EQ(matlab::sinc(INFINITY), 0.0);
+    ASSERT_EQ(matlab::sinc(-INFINITY), 0.0);
+    for (int i = -10; i <= -1; ++i) {
+        const auto x = pow(10, i);
+        const auto actual = matlab::sinc(x);
+        const auto expected = k_expected[sucast(i + 10)];
+        ASSERT_LE(abs(log(actual / expected)), 1e-14);
+    }
+    // For integer x >= 1, sinc(x) = sin(pi*x)/(pi*x) is within floating-point noise of zero
+    for (int i = 0; i <= 10; ++i) {
+        ASSERT_LE(abs(matlab::sinc(pow(10, i))), 1e-15);
+    }
+}

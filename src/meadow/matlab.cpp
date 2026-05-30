@@ -254,4 +254,26 @@ std::vector<double> linspace(double x1, double x2, size_t n)
     return r;
 }
 
+namespace detail
+{
+// From https://github.com/boostorg/math/blob/develop/include/boost/math/special_functions/sinc.hpp, Boost 1.91.0
+inline double sinc_pi(double x)
+{
+    constexpr double fourth_root_epsilon = 0.0001220703125;
+    if (std::isinf(x)) {
+        return 0;
+    } else if (abs(x) >= 3.3 * fourth_root_epsilon) {
+        return sin(x) / x;
+    } else {
+        // |x| < (eps*120)^(1/4)
+        return 1 - x * x / 6;
+    }
+}
+} // namespace detail
+
+double sinc(double x)
+{
+    return detail::sinc_pi(x * num::pi);
+}
+
 } // namespace matlab

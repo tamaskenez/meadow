@@ -234,4 +234,7 @@ std::vector<double> polyfit(
 #endif
 
 std::vector<double> linspace(double x1, double x2, size_t n);
+
+double sinc(double x);
+
 } // namespace matlab
