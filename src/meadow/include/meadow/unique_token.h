@@ -13,8 +13,8 @@
 //     public:
 //         // In move-ctor and move-assignments, resource_id will be copied but token will be moved,
 //         // default implementation is fine.
-//         SomeResource(MixIsInitialized&&) = default;
-//         SomeResource& operator=(MixIsInitialized&&) = default;
+//         SomeResource(SomeResource&&) = default;
+//         SomeResource& operator=(SomeResource&&) = default;
 //
 //         ~SomeResource() {
 //             if (token) {
@@ -27,13 +27,13 @@ class unique_token
 public:
     unique_token() = default;
     unique_token(const unique_token&) = delete;
-    unique_token(unique_token&& y)
+    unique_token(unique_token&& y) noexcept
         : valid_(y.valid_)
     {
         y.valid_ = false;
     }
     unique_token& operator=(const unique_token&) = delete;
-    unique_token& operator=(unique_token&& y)
+    unique_token& operator=(unique_token&& y) noexcept
     {
         valid_ = y.valid_;
         y.valid_ = false;
@@ -43,7 +43,7 @@ public:
     {
         return valid_;
     }
-    bool valid() const
+    [[nodiscard]] bool valid() const
     {
         return valid_;
     }

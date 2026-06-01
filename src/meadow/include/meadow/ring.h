@@ -42,7 +42,9 @@ public:
         } else {
             vs[push_head] = T(std::forward<Args...>(args...));
         }
+        const auto push_head_before = push_head;
         push_head = (push_head + 1) % N;
+        return vs[push_head_before];
     }
 
 private:
