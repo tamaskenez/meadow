@@ -78,7 +78,7 @@ template<class X, class Y>
 auto modulo(X x, Y y)
 {
     assert(y > 0);
-    return ((x % y) + y) % y;
+    return (x % y + y) % y;
 }
 
 template<class X, class L, class H>
