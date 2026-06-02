@@ -37,12 +37,24 @@ double blackman_fn(int n, int L)
     return 0.42 - 0.5 * cos(2 * num::pi * n / (L - 1)) + 0.08 * cos(4 * num::pi * n / (L - 1));
 }
 
+vector<double> gausswin(int L, double alpha)
+{
+    CHECK(L >= 0);
+    vector<double> w(sucast(L));
+    const double center = (ifcast<double>(L) - 1) / 2;
+    for (int n = 0; n < L; ++n) {
+        const double dn = n - center;
+        w[sucast(n)] = exp(-0.5 * square(alpha * dn / center));
+    }
+    return w;
+}
+
 double gausswin_fn(int n, int L, double alpha)
 {
     if (n < 0 || L <= n) {
         return 0.0;
     }
-    const double center = (double(L) - 1) / 2;
+    const double center = (ifcast<double>(L) - 1) / 2;
     const double dn = n - center;
     return exp(-0.5 * square(alpha * dn / center));
 }

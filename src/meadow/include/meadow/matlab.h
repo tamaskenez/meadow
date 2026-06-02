@@ -154,15 +154,15 @@ auto interp1(X&& x, V&& v, XQ xq) -> std::decay_t<decltype(*std::begin(v))>
 }
 
 double rectwin_fn(int n, int L);
-std::vector<double> blackman(int L);
 double blackman_fn(int n, int L);
 double gausswin_fn(int n, int L, double alpha);
-
+double hann_poisson_fn(int n, int L, double alpha);
 #if MEADOW_HAS_CYL_BESSEL_I == 1 || MEADOW_HAS_BOOST == 1
 double kaiser_fn(int n, int L, double beta);
 #endif
 
-double hann_poisson_fn(int n, int L, double alpha);
+std::vector<double> blackman(int L);
+std::vector<double> gausswin(int L, double alpha);
 
 template<class T>
 T nextpow2(T x)
