@@ -1,0 +1,45 @@
+name: CI
+
+on:
+  push:
+    branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        include:
+          - os: macos-latest
+            pip: pip3
+            pip_flags: --break-system-packages
+            cmake_generator: -G Xcode
+          - os: windows-latest
+            pip: pip
+            pip_flags: ""
+            cmake_generator: ""
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Install Conan
+        run: |
+          ${{ matrix.pip }} install conan ${{ matrix.pip_flags }}
+          conan profile detect --force
+
+      - name: Build Conan dependencies
+        shell: bash
+        run: ./1_build_conan.sh
+
+      - name: Configure
+        run: cmake -S . -B _b ${{ matrix.cmake_generator }}
+
+      - name: Build
+        run: cmake --build _b --config Debug
+
+      - name: Test
+        run: ctest --test-dir _b -C Debug --output-on-failure
