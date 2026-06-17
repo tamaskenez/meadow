@@ -9,7 +9,7 @@ expected<string, string> read_file_to_string(const fs::path& path)
         return unexpected(ec.message());
     }
     string result(size, 0);
-    FILE* f = fopen(path.c_str(), "rb");
+    FILE* f = fopen(path.string().c_str(), "rb");
     if (!f) {
         if (errno) {
             return unexpected(strerrno_or_int(errno));
@@ -26,7 +26,7 @@ expected<string, string> read_file_to_string(const fs::path& path)
 
 expected<void, string> write_string_to_file(string_view sv, const fs::path& path)
 {
-    FILE* f = fopen(path.c_str(), "wb");
+    FILE* f = fopen(path.string().c_str(), "wb");
     if (!f) {
         if (errno) {
             return unexpected(strerrno_or_int(errno));

@@ -25,6 +25,7 @@
 #include <mdspan>
 #include <memory>
 #include <numbers>
+#include <numeric>
 #include <optional>
 #include <print>
 #include <random>

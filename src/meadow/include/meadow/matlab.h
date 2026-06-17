@@ -77,7 +77,7 @@ template<class T>
     requires std::integral<T> || std::floating_point<T>
 [[nodiscard]] std::expected<void, std::string> saveAscii(const std::filesystem::path& path, std::span<T> xs)
 {
-    FILE* f = fopen(path.c_str(), "wt");
+    FILE* f = fopen(path.string().c_str(), "wt");
     if (!f) {
         return std::unexpected(format("{} ({})", strerror(errno), strerrno_or_int(errno)));
     }
