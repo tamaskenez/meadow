@@ -26,18 +26,23 @@ jobs:
         with:
           fetch-depth: 1
 
+      - name: Cache Conan packages
+        id: conan-cache
+        uses: actions/cache@v4
+        with:
+          path: id
+          key: conan-${{ matrix.os }}-${{ hashFiles('conanfile.txt') }}
+
       - name: Install Conan
+        if: steps.conan-cache.outputs.cache-hit != 'true'
         run: |
           ${{ matrix.pip }} install conan ${{ matrix.pip_flags }}
           conan profile detect --force
 
       - name: Build Conan dependencies
+        if: steps.conan-cache.outputs.cache-hit != 'true'
         shell: bash
-        run: ./1_build_conan.sh
-
-      - name: Build non-Conan dependencies
-        shell: bash
-        run: ./2_build_nonconan.sh
+        run: ./1_build_conan.sh --use-deployer
 
       - name: Configure
         run: cmake -S . -B _b ${{ matrix.cmake_generator }}
