@@ -35,6 +35,10 @@ jobs:
         shell: bash
         run: ./1_build_conan.sh
 
+      - name: Build non-Conan dependencies
+        shell: bash
+        run: ./2_build_nonconan.sh
+
       - name: Configure
         run: cmake -S . -B _b ${{ matrix.cmake_generator }}
 
