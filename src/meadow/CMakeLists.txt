@@ -54,7 +54,7 @@ endif()
 
 if(MEADOW_HAS_SDL_MIXER)
     target_link_libraries(meadow PUBLIC
-        SDL3_mixer::SDL3_mixer
+        SDL3_mixer::SDL3_mixer-static
     )
 endif()
 

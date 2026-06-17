@@ -5,7 +5,7 @@ project(meadow)
 # IMPORTED_LOCATION_<CONFIG> set. CMake 4.x validates all imported targets at configure
 # time, erroring on missing locations for other configs. Setting CMP0111 OLD turns this
 # back into a warning — Conan's config files select the correct variant at link time.
-cmake_policy(SET CMP0111 OLD)
+cmake_policy(SET CMP0111 OLD) # Still needed with conan 2.29.1
 
 if(PROJECT_IS_TOP_LEVEL)
     if(NOT CMAKE_PREFIX_PATH)
