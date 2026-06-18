@@ -22,9 +22,9 @@ if(PROJECT_IS_TOP_LEVEL)
         find_package(GTest REQUIRED CONFIG)
     endif()
 
-    if(NOT MSVC)
+    #if(NOT MSVC)
         set(CMAKE_COMPILE_WARNING_AS_ERROR ON)
-    endif()
+    #endif()
 
     include(${CMAKE_SOURCE_DIR}/cmake/warnings_clang.cmake)
     include(${CMAKE_SOURCE_DIR}/cmake/warnings_gcc.cmake)

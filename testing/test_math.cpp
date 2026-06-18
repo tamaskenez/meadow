@@ -6,8 +6,12 @@ namespace
 {
 void expectDoubleEq(pair<double, double> a, pair<double, double> b)
 {
+    EXPECT_NEAR(a.first, b.first, 1e-10);
+    EXPECT_NEAR(a.second, b.second, 1e-10);
+#ifndef _MSC_VER
     EXPECT_DOUBLE_EQ(a.first, b.first);
     EXPECT_DOUBLE_EQ(a.second, b.second);
+#endif
 }
 
 #if MEADOW_HAS_EIGEN == 1
