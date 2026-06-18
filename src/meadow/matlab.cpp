@@ -151,9 +151,9 @@ template array<float, 2> polyfit1(span<const float> xs, span<const float> ys);
 template array<double, 2> polyfit1(span<const double> xs, span<const double> ys);
 
 template<class C, class X>
-decltype(std::declval<C>() * std::declval<X>()) polyval(std::span<const C> cs, X x)
+decltype(C{} * X{}) polyval(std::span<const C> cs, X x)
 {
-    using R = decltype(std::declval<C>() * std::declval<X>());
+    using R = decltype(C{} * X{});
     const auto N = cs.size();
     if (N == 0) {
         return R(0);
