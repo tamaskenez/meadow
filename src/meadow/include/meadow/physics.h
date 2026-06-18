@@ -68,4 +68,5 @@ std::pair<T, T> integrate_newton_dynamics(
         return std::pair(next_pos, next_v);
     } break;
     }
+    std::unreachable();
 }
