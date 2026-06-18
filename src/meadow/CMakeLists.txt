@@ -62,6 +62,12 @@ if(MEADOW_HAS_SDL_MIXER)
     )
 endif()
 
+if(MEADOW_HAS_MAGIC_ENUM)
+    target_link_libraries(meadow PUBLIC
+        magic_enum::magic_enum
+    )
+endif()
+
 foreach(dependency IN LISTS dependencies)
     if(MEADOW_HAS_${dependency})
         target_compile_definitions(meadow PUBLIC MEADOW_HAS_${dependency}=1)
