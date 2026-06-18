@@ -18,9 +18,7 @@ jobs:
             cmake_generator: ""
 
     steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 1
+      - uses: actions/checkout@v6
 
       - name: Cache Conan packages
         id: conan-cache
