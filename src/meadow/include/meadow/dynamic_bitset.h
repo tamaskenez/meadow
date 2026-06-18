@@ -1,6 +1,8 @@
 #pragma once
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wdocumentation"
+#ifdef __clang__
+  #pragma clang diagnostic push
+  #pragma clang diagnostic ignored "-Wdocumentation"
+#endif
 
 // clang-format off
 
@@ -3689,4 +3691,6 @@ namespace sul
 
 #endif // SUL_DYNAMIC_BITSET_HPP
 // ---- END ORIGINAL FILE ---
-#pragma clang diagnostic pop
+#ifdef __clang__
+  #pragma clang diagnostic pop
+#endif

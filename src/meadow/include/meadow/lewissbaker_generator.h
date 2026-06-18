@@ -1,9 +1,11 @@
 #pragma once
 // COPIED FROM https://github.com/lewissbaker/generator
 
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wshadow-field-in-constructor"
-#pragma clang diagnostic ignored "-Wunused-parameter"
+#ifdef __clang__
+  #pragma clang diagnostic push
+  #pragma clang diagnostic ignored "-Wshadow-field-in-constructor"
+  #pragma clang diagnostic ignored "-Wunused-parameter"
+#endif
 
 // BEGIN ORIGINAL FILE (reformatted to local clang-format)
 #ifndef __STD_GENERATOR_INCLUDED
@@ -908,4 +910,6 @@ constexpr inline bool enable_view<generator<_T, _U, _Alloc>> = true;
 
 #endif // __STD_GENERATOR_INCLUDED
 
-#pragma clang diagnostic pop
+#ifdef __clang__
+  #pragma clang diagnostic pop
+#endif

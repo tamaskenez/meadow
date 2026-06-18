@@ -1,7 +1,13 @@
 #pragma once
 
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wsign-compare"
+#ifdef __clang__
+  #pragma clang diagnostic push
+  #pragma clang diagnostic ignored "-Wsign-compare"
+#endif
+#ifdef _MSC_VER
+  #pragma warning(push)
+  #pragma warning(disable: 4018)
+#endif
 /*
  * SPDX-FileCopyrightText: Copyright (c) 2023 Gonzalo Brito Gadeschi. All rights reserved.
  * SPDX-License-Identifier: MIT
@@ -852,4 +858,9 @@ public:
 #undef __IV_ASSERT
 #undef __IV_EXPECT
 
-#pragma clang diagnostic pop
+#ifdef __clang__
+  #pragma clang diagnostic pop
+#endif
+#ifdef _MSC_VER
+  #pragma warning(pop)
+#endif

@@ -6,7 +6,9 @@
 #include <complex>
 #include <numbers>
 
-#pragma clang diagnostic ignored "-Wsign-conversion"
+#ifdef __clang__
+  #pragma clang diagnostic ignored "-Wsign-conversion"
+#endif
 
 namespace matlab
 {
