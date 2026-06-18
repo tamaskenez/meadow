@@ -13,12 +13,8 @@ jobs:
       matrix:
         include:
           - os: macos-latest
-            pip: pip3
-            pip_flags: --break-system-packages
             cmake_generator: -G Xcode
           - os: windows-latest
-            pip: pip
-            pip_flags: ""
             cmake_generator: ""
 
     steps:
@@ -35,9 +31,7 @@ jobs:
 
       - name: Install Conan
         if: steps.conan-cache.outputs.cache-hit != 'true'
-        run: |
-          ${{ matrix.pip }} install conan ${{ matrix.pip_flags }}
-          conan profile detect --force
+        uses: conan-io/setup-conan@v1
 
       - name: Build Conan dependencies
         if: steps.conan-cache.outputs.cache-hit != 'true'
