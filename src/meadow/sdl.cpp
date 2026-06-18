@@ -3,6 +3,8 @@
 #include <SDL3/SDL_log.h>
 #include <SDL3/SDL_timer.h>
 
+#include <utility>
+
 namespace detail
 {
 void check_sdl_handle_failure(bool terminate_on_error, const std::source_location& location)
@@ -167,6 +169,7 @@ string sdl_get_property_as_string(SDL_PropertiesID props, const char* name)
     case SDL_PROPERTY_TYPE_BOOLEAN:
         return SDL_GetBooleanProperty(props, name, false) ? "true" : "false";
     }
+    std::unreachable();
 }
 
 namespace
