@@ -66,6 +66,8 @@ if(MEADOW_HAS_MAGIC_ENUM)
     target_link_libraries(meadow PUBLIC
         magic_enum::magic_enum
     )
+    get_target_property(v magic_enum::magic_enum SYSTEM)
+    message(STATUS "magic_enum::magic_enum SYSTEM property is: \"${v}\"")
 endif()
 
 foreach(dependency IN LISTS dependencies)
