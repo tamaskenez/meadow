@@ -1,6 +1,9 @@
 #include "meadow/matlab.h"
+
 #include "meadow/cppext.h"
 #include "meadow/math.h"
+
+#include <complex>
 
 #if MEADOW_HAS_CYL_BESSEL_I == 0 && MEADOW_HAS_BOOST == 1
   #include <boost/math/special_functions/bessel.hpp>
@@ -151,9 +154,9 @@ template array<float, 2> polyfit1(span<const float> xs, span<const float> ys);
 template array<double, 2> polyfit1(span<const double> xs, span<const double> ys);
 
 template<class C, class X>
-decltype(C{} * X{}) polyval(std::span<const C> cs, X x)
+decltype(std::declval<C>() * std::declval<X>()) polyval(std::span<const C> cs, X x)
 {
-    using R = decltype(C{} * X{});
+    using R = decltype(std::declval<C>() * std::declval<X>());
     const auto N = cs.size();
     if (N == 0) {
         return R(0);

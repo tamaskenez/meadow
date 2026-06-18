@@ -192,7 +192,7 @@ template<class T>
 std::array<T, 2> polyfit1(std::span<const T> xs, std::span<const T> ys);
 
 template<class C, class X>
-decltype(C{} * X{}) polyval(std::span<const C> cs, X x);
+decltype(std::declval<C>() * std::declval<X>()) polyval(std::span<const C> cs, X x);
 
 template<class T>
 std::vector<T> polyder(std::span<const T> cs);
