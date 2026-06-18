@@ -19,6 +19,10 @@ target_include_directories(meadow
     PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>/include
 )
 
+target_compile_definitions(meadow PRIVATE
+    _CRT_SECURE_NO_WARNINGS
+)
+
 if(HAVE_CYL_BESSEL_I)
     target_compile_definitions(meadow PUBLIC MEADOW_HAS_CYL_BESSEL_I=1)
 else()

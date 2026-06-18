@@ -73,37 +73,35 @@ constexpr auto deg2rad(T x)
     return x * static_cast<R>(num::pi / 180.0);
 }
 
+namespace detail
+{
+std::expected<void, std::string>
+saveAscii_core(const std::filesystem::path& path, const std::function<void(FILE* f)>& f);
+}
+
 template<class T>
     requires std::integral<T> || std::floating_point<T>
 [[nodiscard]] std::expected<void, std::string> saveAscii(const std::filesystem::path& path, std::span<T> xs)
 {
-    FILE* f = fopen(path.string().c_str(), "wt");
-    if (!f) {
-        return std::unexpected(format("{} ({})", strerror(errno), strerrno_or_int(errno)));
-    }
-    for (auto x : xs) {
-        std::println(f, "{}", x);
-    }
-    CHECK(fclose(f) == 0);
-    return {};
+    return saveAscii_core(path, [&](FILE* f) {
+        for (auto x : xs) {
+            std::println(f, "{}", x);
+        }
+    });
 }
 
 template<class T>
     requires std::integral<T> || std::floating_point<T>
 [[nodiscard]] std::expected<void, std::string> saveAscii(const char* path, const MatrixReader<T>& mr)
 {
-    FILE* f = fopen(path, "wt");
-    if (!f) {
-        return std::unexpected(format("{} ({})", strerror(errno), strerrno_or_int(errno)));
-    }
-    for (size_t r = 0; r < mr.rows; ++r) {
-        for (size_t c = 0; c < mr.cols; ++c) {
-            std::print(f, "{} ", mr.atFn(r, c));
+    return saveAscii_core(path, [&](FILE* f) {
+        for (size_t r = 0; r < mr.rows; ++r) {
+            for (size_t c = 0; c < mr.cols; ++c) {
+                std::print(f, "{} ", mr.atFn(r, c));
+            }
+            std::println(f);
         }
-        std::println(f);
-    }
-    CHECK(fclose(f) == 0);
-    return {};
+    });
 }
 
 template<class R, class X>

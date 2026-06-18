@@ -13,6 +13,21 @@
 namespace matlab
 {
 
+namespace detail
+{
+std::expected<void, std::string>
+saveAscii_core(const std::filesystem::path& path, const std::function<void(FILE* f)>& fn)
+{
+    FILE* f = fopen(path.string().c_str(), "wt");
+    if (!f) {
+        return std::unexpected(format("{} ({})", strerror(errno), strerrno_or_int(errno)));
+    }
+    fn(f);
+    CHECK(fclose(f) == 0);
+    return {};
+}
+} // namespace detail
+
 double rectwin_fn(int n, int L)
 {
     return 0 <= n && n < L ? 1.0 : 0.0;
