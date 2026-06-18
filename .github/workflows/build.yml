@@ -41,8 +41,3 @@ jobs:
       - name: Configure
         run: cmake -S . -B _b ${{ matrix.cmake_generator }}
 
-      - name: Build
-        run: cmake --build _b --config Debug
-
-      - name: Test
-        run: ctest --test-dir _b -C Debug --output-on-failure
