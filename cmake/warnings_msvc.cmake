@@ -4,7 +4,7 @@ if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
 		/permissive- # Specify standards conformance mode to the compiler.
 		/w14061      # Enumerators in a switch statement not explicitly handled by case.
 		/w14062      # Enumerator 'identifier' in a switch of enum 'enumeration' is not handled.
-#		/w14242      # The types are different, possible loss of data. The compiler makes the conversion.
+		/w14242      # The types are different, possible loss of data. The compiler makes the conversion.
 		/w14254      # A larger bit field was assigned to a smaller bit field, possible loss of data.
 		/w14263      # Member function does not override any base class virtual member function.
 		/w14265      # 'class': class has virtual functions, but destructor is not virtual.
