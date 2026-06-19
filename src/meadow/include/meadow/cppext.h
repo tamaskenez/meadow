@@ -401,3 +401,5 @@ auto signed_subtract(X x, Y y)
         return detail::signed_subtract_core(iicast<int64_t>(x), iicast<int64_t>(y));
     }
 }
+
+NODIS expected<FILE*, errno_t> try_fopen(const char* filename, const char* mode);

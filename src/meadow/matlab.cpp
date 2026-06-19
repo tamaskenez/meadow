@@ -4,6 +4,7 @@
 #include "meadow/math.h"
 
 #include <complex>
+#include <system_error>
 
 #if MEADOW_HAS_CYL_BESSEL_I == 0 && MEADOW_HAS_BOOST == 1
   #include <boost/math/special_functions/bessel.hpp>
@@ -21,12 +22,14 @@ namespace detail
 std::expected<void, std::string>
 saveAscii_core(const std::filesystem::path& path, const std::function<void(FILE* f)>& fn)
 {
-    FILE* f = fopen(path.string().c_str(), "wt");
-    if (!f) {
-        return std::unexpected(format("{} ({})", strerror(errno), strerrno_or_int(errno)));
+    auto f_or = try_fopen(path.string().c_str(), "wt");
+    if (!f_or) {
+        return std::unexpected(
+          format("{} ({})", std::system_category().message(f_or.error()), strerrno_or_int(f_or.error()))
+        );
     }
-    fn(f);
-    CHECK(fclose(f) == 0);
+    fn(*f_or);
+    CHECK(fclose(*f_or) == 0);
     return {};
 }
 } // namespace detail
