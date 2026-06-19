@@ -1,6 +1,5 @@
 if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
 	add_compile_options(
-		/external:W0  # Suppress warnings from headers in external (SYSTEM) include paths.
 		/permissive- # Specify standards conformance mode to the compiler.
 		/w14061      # Enumerators in a switch statement not explicitly handled by case.
 		/w14062      # Enumerator 'identifier' in a switch of enum 'enumeration' is not handled.
