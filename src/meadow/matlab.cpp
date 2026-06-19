@@ -4,6 +4,7 @@
 #include "meadow/math.h"
 
 #include <complex>
+#include <system_error>
 
 #if MEADOW_HAS_CYL_BESSEL_I == 0 && MEADOW_HAS_BOOST == 1
   #include <boost/math/special_functions/bessel.hpp>
@@ -23,7 +24,9 @@ saveAscii_core(const std::filesystem::path& path, const std::function<void(FILE*
 {
     auto f_or = try_fopen(path.string().c_str(), "wt");
     if (!f_or) {
-        return std::unexpected(format("{} ({})", strerror(f_or.error()), strerrno_or_int(f_or.error())));
+        return std::unexpected(
+          format("{} ({})", std::system_category().message(f_or.error()), strerrno_or_int(f_or.error()))
+        );
     }
     fn(*f_or);
     CHECK(fclose(*f_or) == 0);
