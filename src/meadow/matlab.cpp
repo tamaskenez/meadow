@@ -21,12 +21,12 @@ namespace detail
 std::expected<void, std::string>
 saveAscii_core(const std::filesystem::path& path, const std::function<void(FILE* f)>& fn)
 {
-    FILE* f = fopen(path.string().c_str(), "wt");
-    if (!f) {
-        return std::unexpected(format("{} ({})", strerror(errno), strerrno_or_int(errno)));
+    auto f_or = try_fopen(path.string().c_str(), "wt");
+    if (!f_or) {
+        return std::unexpected(format("{} ({})", strerror(f_or.error()), strerrno_or_int(f_or.error())));
     }
-    fn(f);
-    CHECK(fclose(f) == 0);
+    fn(*f_or);
+    CHECK(fclose(*f_or) == 0);
     return {};
 }
 } // namespace detail

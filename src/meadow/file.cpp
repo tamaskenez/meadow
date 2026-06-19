@@ -9,15 +9,12 @@ expected<string, string> read_file_to_string(const fs::path& path)
         return unexpected(ec.message());
     }
     string result(size, 0);
-    FILE* f = fopen(path.string().c_str(), "rb");
-    if (!f) {
-        if (errno) {
-            return unexpected(strerrno_or_int(errno));
-        }
-        return unexpected("fopen failed");
+    auto f_or = try_fopen(path.string().c_str(), "rb");
+    if (!f_or) {
+        return unexpected(strerrno_or_int(f_or.error()));
     }
-    auto bytes_read = fread(result.data(), 1, size, f);
-    fclose(f);
+    auto bytes_read = fread(result.data(), 1, size, *f_or);
+    fclose(*f_or);
     if (bytes_read != size) {
         return unexpected(format("read {} bytes instead of {}", bytes_read, size));
     }
@@ -26,15 +23,12 @@ expected<string, string> read_file_to_string(const fs::path& path)
 
 expected<void, string> write_string_to_file(string_view sv, const fs::path& path)
 {
-    FILE* f = fopen(path.string().c_str(), "wb");
-    if (!f) {
-        if (errno) {
-            return unexpected(strerrno_or_int(errno));
-        }
-        return unexpected("fopen failed");
+    auto f_or = try_fopen(path.string().c_str(), "wb");
+    if (!f_or) {
+        return unexpected(strerrno_or_int(f_or.error()));
     }
-    auto bytes_written = fwrite(sv.data(), 1, sv.size(), f);
-    fclose(f);
+    auto bytes_written = fwrite(sv.data(), 1, sv.size(), *f_or);
+    fclose(*f_or);
     if (bytes_written != sv.size()) {
         return unexpected(format("wrote {} bytes instead of {}", bytes_written, sv.size()));
     }

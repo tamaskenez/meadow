@@ -9,3 +9,19 @@
     std::terminate();
 }
 #endif
+
+expected<FILE*, errno_t> try_fopen(const char* filename, const char* mode)
+{
+#ifdef _MSC_VER
+    FILE* f{};
+    if (errno_t e = fopen_s(&f, filename, mode); e != 0) {
+        return unexpected(e);
+    }
+    return f;
+#else
+    if (FILE* f = fopen(filename, mode)) {
+        return f;
+    }
+    return unexpected(errno);
+#endif
+}
