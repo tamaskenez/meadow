@@ -123,3 +123,31 @@ TEST(cppext, signed_subtract)
     ASSERT_EQ(signed_subtract(uint64_t(3), uint64_t(2)), 1);
     ASSERT_EQ(signed_subtract(uint64_t(2), uint64_t(3)), -1);
 }
+
+TEST(cppext, PP_CAT)
+{
+    // Basic token concatenation
+    constexpr int foobar = 42;
+    static_assert(MEADOW_PP_CAT(foo, bar) == 42);
+
+    // Numeric tokens
+    static_assert(MEADOW_PP_CAT(1, 2) == 12);
+
+    // Macro arguments are expanded before concatenation
+#define PP_CAT_TEST_A foo
+#define PP_CAT_TEST_B bar
+    static_assert(MEADOW_PP_CAT(PP_CAT_TEST_A, PP_CAT_TEST_B) == 42);
+#undef PP_CAT_TEST_A
+#undef PP_CAT_TEST_B
+}
+
+TEST(cppext, PP_STRINGIZE)
+{
+    // Basic stringization
+    static_assert(std::string_view(MEADOW_PP_STRINGIZE(hello)) == "hello");
+
+    // Macro arguments are expanded before stringization
+#define PP_STRINGIZE_TEST_A hello
+    static_assert(std::string_view(MEADOW_PP_STRINGIZE(PP_STRINGIZE_TEST_A)) == "hello");
+#undef PP_STRINGIZE_TEST_A
+}

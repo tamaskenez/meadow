@@ -104,8 +104,22 @@ inline void __inline_void_function_with_empty_body__() {}
 #define UNUSED [[maybe_unused]]
 #define NODIS [[nodiscard]]
 
-#define PP_CONCAT2(A, B) A##B
-#define PP_CONCAT(A, B) PP_CONCAT2(A, B)
+#define MEADOW_PP_CAT(a, b) MEADOW_PP_CAT_I(a, b)
+
+#ifdef _MSC_VER
+  #define MEADOW_PP_CAT_I(a, b) MEADOW_PP_CAT_II(~, a##b)
+  #define MEADOW_PP_CAT_II(p, res) res
+#else
+  #define MEADOW_PP_CAT_I(a, b) a##b
+#endif
+
+#ifdef _MSC_VER
+  #define MEADOW_PP_STRINGIZE(text) MEADOW_PP_STRINGIZE_A((text))
+  #define MEADOW_PP_STRINGIZE_A(arg) MEADOW_PP_STRINGIZE_I arg
+#else
+  #define MEADOW_PP_STRINGIZE(text) MEADOW_PP_STRINGIZE_I(text)
+#endif
+#define MEADOW_PP_STRINGIZE_I(...) #__VA_ARGS__
 
 #define HOLDS(VARIANT, ALTERNATIVE) std::holds_alternative<ALTERNATIVE>(VARIANT)
 
