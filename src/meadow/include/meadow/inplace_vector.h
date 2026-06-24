@@ -45,7 +45,12 @@
 #include <type_traits> // for aligned_storage and all meta-functions
 
 // Optimizer allowed to assume that EXPR evaluates to true
-#define __IV_ASSUME(__EXPR) static_cast<void>((__EXPR) ? void(0) : __builtin_unreachable())
+#if defined(_MSC_VER) && !defined(__clang__)
+  #define __IV_UNREACHABLE() __assume(0)
+#else
+  #define __IV_UNREACHABLE() __builtin_unreachable()
+#endif
+#define __IV_ASSUME(__EXPR) static_cast<void>((__EXPR) ? void(0) : __IV_UNREACHABLE())
 
 // Assert pretty printer
 #define __IV_ASSERT(...)                                                                                \
