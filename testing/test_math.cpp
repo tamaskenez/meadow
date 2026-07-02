@@ -151,3 +151,47 @@ TEST(math, module_integral)
         EXPECT_EQ(modulo(20 + i * M, M), 20);
     }
 }
+
+static void test_regspace(double begin, double end, double step, const vector<double>& expected)
+{
+#ifndef NDEBUG
+    if (expected.empty()) {
+        return;
+    }
+#endif
+    auto r = regspace(begin, step, end);
+
+    ASSERT_EQ(r.size(), expected.size());
+    for (size_t i = 0; i < r.size(); ++i) {
+        ASSERT_DOUBLE_EQ(r[i], expected[i]);
+    }
+}
+
+TEST(math, regspace)
+{
+    test_regspace(1.0, 1.0, -0.3, {1.0});
+    test_regspace(1.0, 1.0, 0.0, {});
+    test_regspace(1.0, 1.0, 0.3, {1.0});
+    test_regspace(1.0, 2.0, -0.3, {});
+    test_regspace(1.0, 2.0, 0.0, {});
+    test_regspace(1.0, 2.0, 0.3, {1.0, 1.3, 1.6, 1.9});
+    test_regspace(2.0, 1.0, -0.3, {2.0, 1.7, 1.4, 1.1});
+    test_regspace(2.0, 1.0, 0.0, {});
+    test_regspace(2.0, 1.0, 0.3, {});
+    test_regspace(1.0, 1.0, -1.0, {1.0});
+    test_regspace(1.0, 1.0, 1.0, {1.0});
+    test_regspace(1.0, 2.0, -1.0, {});
+    test_regspace(1.0, 2.0, 1.0, {1.0, 2.0});
+    test_regspace(2.0, 1.0, -1.0, {2.0, 1.0});
+    test_regspace(2.0, 1.0, 1.0, {});
+    test_regspace(1.0, 1.0, -2.0, {1.0});
+    test_regspace(1.0, 1.0, 2.0, {1.0});
+    test_regspace(1.0, 2.0, -2.0, {});
+    test_regspace(1.0, 2.0, 2.0, {1.0});
+    test_regspace(2.0, 1.0, -2.0, {2.0});
+    test_regspace(2.0, 1.0, 2.0, {});
+    test_regspace(0.0, 1.0, 0.1, {0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0});
+    test_regspace(0.0, 1.0, 1.0 / 3.0, {0.0, 1.0 / 3.0, 2.0 / 3.0, 1.0});
+    test_regspace(0.0, -1.0, -1.0 / 3.0, {0.0, -1.0 / 3.0, -2.0 / 3.0, -1.0});
+    test_regspace(0.0, 2.0, 2.0 / 3.0, {0.0, 2.0 / 3.0, 4.0 / 3.0, 2.0});
+}

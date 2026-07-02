@@ -1,10 +1,12 @@
 #pragma once
 
+#include <algorithm>
 #include <cassert>
 #include <cmath>
 #include <concepts>
 #include <span>
 #include <utility>
+#include <vector>
 
 template<class T>
 constexpr T square(T x)
@@ -134,4 +136,35 @@ F round_to_digits(F x, int num_digits)
 {
     const auto unit = pow(10.0, num_digits);
     return ffcast<F>(round(x * unit) / unit);
+}
+
+template<class T>
+    requires std::floating_point<T>
+std::vector<T> regspace(T begin, T step, T end)
+{
+    std::vector<T> result;
+    if (step < T(0)) {
+        if (begin < end) {
+            assert(false);
+        } else {
+            auto n = ifloor<size_t>((end - begin) / step) + 1;
+            result.reserve(n);
+            for (size_t i = 0; i < n; ++i) {
+                result.push_back(std::max(end, begin + ifcast<T>(i) * step));
+            }
+        }
+    } else if (T(0) < step) {
+        if (begin > end) {
+            assert(false);
+        } else {
+            auto n = ifloor<size_t>((end - begin) / step) + 1;
+            result.reserve(n);
+            for (size_t i = 0; i < n; ++i) {
+                result.push_back(std::min(end, begin + ifcast<T>(i) * step));
+            }
+        }
+    } else {
+        assert(false);
+    }
+    return result;
 }
