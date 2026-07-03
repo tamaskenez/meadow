@@ -195,3 +195,24 @@ TEST(math, regspace)
     test_regspace(0.0, -1.0, -1.0 / 3.0, {0.0, -1.0 / 3.0, -2.0 / 3.0, -1.0});
     test_regspace(0.0, 2.0, 2.0 / 3.0, {0.0, 2.0 / 3.0, 4.0 / 3.0, 2.0});
 }
+
+static void test_modf(double x, double i, double f)
+{
+    auto [integral, fractional] = floor_frac(x);
+    EXPECT_DOUBLE_EQ(i, integral);
+    EXPECT_DOUBLE_EQ(f, fractional);
+}
+
+TEST(math, modf)
+{
+    test_modf(1.5, 1, 0.5);
+    test_modf(1.0, 1, 0);
+    test_modf(0.9, 0, 0.9);
+    test_modf(0.1, 0, 0.1);
+    test_modf(0.0, 0, 0);
+    test_modf(-0.0, 0, 0);
+    test_modf(-0.1, -1, 0.9);
+    test_modf(-0.9, -1, 0.1);
+    test_modf(-1.0, -1, 0);
+    test_modf(-1.5, -2, 0.5);
+}

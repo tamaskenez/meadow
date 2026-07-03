@@ -168,3 +168,11 @@ std::vector<T> regspace(T begin, T step, T end)
     }
     return result;
 }
+
+template<class T>
+    requires std::floating_point<T>
+pair<T, T> floor_frac(T x)
+{
+    const auto integral = floor(x);
+    return pair(integral, x - integral);
+}
