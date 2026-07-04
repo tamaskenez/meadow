@@ -1,5 +1,7 @@
 #pragma once
 
+#include "detail/float_to_int_cast_core.h"
+
 #include <algorithm>
 #include <cassert>
 #include <cmath>
@@ -26,14 +28,14 @@ std::pair<R, R> extremumOfParabola(std::span<const X> xs, std::span<const Y> ys)
 
 template<class T>
     requires std::integral<T>
-bool is_even(T x)
+constexpr bool is_even(T x)
 {
     return (x & 1) == 0;
 }
 
 template<class T>
     requires std::integral<T>
-bool is_odd(T x)
+constexpr bool is_odd(T x)
 {
     return (x & 1) == 1;
 }
@@ -175,4 +177,12 @@ pair<T, T> floor_frac(T x)
 {
     const auto integral = floor(x);
     return pair(integral, x - integral);
+}
+
+template<class I, class T>
+    requires std::floating_point<T>
+pair<I, T> ifloor_frac(T x)
+{
+    const auto integral = floor(x);
+    return pair(detail::float_to_int_cast_core<I>(integral), x - integral);
 }

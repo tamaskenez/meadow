@@ -163,7 +163,7 @@ std::vector<double> blackman(int L);
 std::vector<double> gausswin(int L, double alpha);
 
 template<class T>
-T nextpow2(T x)
+constexpr T nextpow2(T x)
 {
     if constexpr (std::is_signed_v<T>) {
         if (x == std::numeric_limits<T>::min()) {
