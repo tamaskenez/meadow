@@ -1,6 +1,6 @@
 [requires]
 gtest/1.17.0
-abseil/20260107.1
+abseil/20260526.0
 eigen/5.0.1
 magic_enum/0.9.7
 sdl/3.4.8
