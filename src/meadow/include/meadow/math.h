@@ -130,6 +130,21 @@ constexpr bool equal_epsilon(X x, X y, X eps)
     return in_cc_range(x - y, -eps, eps);
 }
 
+template<class X>
+    requires std::floating_point<X>
+constexpr bool equal_epsilon(span<const X> x, span<const X> y, X eps)
+{
+    if (x.size() != y.size()) {
+        return false;
+    }
+    for (size_t i = 0; i < x.size(); ++i) {
+        if (!equal_epsilon(x[i], y[i], eps)) {
+            return false;
+        }
+    }
+    return true;
+}
+
 // Round to specified decimal places after the decimal point (num_digits >= 0).
 // If num_digits < 0, rounds to multiplies of pow(10, -num_digits).
 template<class F>

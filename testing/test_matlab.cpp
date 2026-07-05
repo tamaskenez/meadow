@@ -1,3 +1,4 @@
+#include "meadow/math.h"
 #include "meadow/matlab.h"
 
 #include "meadow/span.h"
@@ -472,5 +473,36 @@ TEST(matlab, sinc)
     // For integer x >= 1, sinc(x) = sin(pi*x)/(pi*x) is within floating-point noise of zero
     for (int i = 0; i <= 10; ++i) {
         ASSERT_LE(abs(matlab::sinc(pow(10, i))), 1e-15);
+    }
+}
+
+TEST(matlab, linspace)
+{
+    {
+        const auto expected = vector<double>({2, 2.5, 3, 3.5, 4});
+        ASSERT_EQ(matlab::linspace(2, 4, 5), expected);
+    }
+    {
+        const auto expected = vector<double>({2, 0.5, -1, -2.5, -4});
+        ASSERT_EQ(matlab::linspace(2, -4, 5), expected);
+    }
+}
+
+static void assert_double_eq(const vector<double>& a, const vector<double>& b)
+{
+    ASSERT_EQ(a.size(), b.size());
+    for (size_t i = 0; i < a.size(); ++i) {
+        ASSERT_DOUBLE_EQ(a[i], b[i]);
+    }
+}
+
+TEST(matlab, logspace)
+{
+    {
+        assert_double_eq(matlab::logspace(-1, 2, 4), vector<double>({0.1, 1, 10, 100}));
+    }
+    {
+        const auto expected = vector<double>({10, 1, 0.1});
+        ASSERT_EQ(matlab::logspace(1, -1, 3), expected);
     }
 }

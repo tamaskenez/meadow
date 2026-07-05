@@ -287,6 +287,17 @@ std::vector<double> linspace(double x1, double x2, size_t n)
     return r;
 }
 
+std::vector<double> logspace(double e1, double e2, size_t n)
+{
+    std::vector<double> r;
+    r.reserve(n);
+    const double one_over_n_minus_1 = 1.0 / ifcast<double>(n - 1);
+    for (size_t i = 0; i < n; ++i) {
+        r.push_back(pow(10.0, std::lerp(e1, e2, ifcast<double>(i) * one_over_n_minus_1)));
+    }
+    return r;
+}
+
 namespace detail
 {
 // From https://github.com/boostorg/math/blob/develop/include/boost/math/special_functions/sinc.hpp, Boost 1.91.0
