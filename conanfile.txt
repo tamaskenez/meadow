@@ -2,7 +2,7 @@
 gtest/1.17.0
 abseil/20260526.0
 eigen/5.0.1
-magic_enum/0.9.7
+magic_enum/0.9.8
 sdl/3.4.8
 sdl_mixer/3.2.0
 boost/1.91.0
