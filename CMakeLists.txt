@@ -8,6 +8,8 @@ project(meadow)
 cmake_policy(SET CMP0111 OLD) # Still needed with conan 2.29.1
 
 if(PROJECT_IS_TOP_LEVEL)
+    set(CMAKE_FIND_USE_PACKAGE_REGISTRY OFF)
+
     if(NOT CMAKE_PREFIX_PATH)
         set(CMAKE_PREFIX_PATH ${CMAKE_CURRENT_SOURCE_DIR}/id)
     endif()
