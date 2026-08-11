@@ -100,8 +100,9 @@ using std::weak_ptr;
 #define BEGIN_END(X) std::begin(X), std::end(X)
 #define MOVE(X) std::move(X)
 
-inline void __inline_void_function_with_empty_body__() {}
-#define NOP __inline_void_function_with_empty_body__()
+inline void meadow_inline_void_function_with_empty_body() {}
+
+#define NOP meadow_inline_void_function_with_empty_body()
 
 #define UNUSED [[maybe_unused]]
 #define NODIS [[nodiscard]]
@@ -285,6 +286,42 @@ inline void TRY_OR_FAIL(std::expected<void, std::string> X)
     LOG_IF(FATAL, !X) << X.error();
 }
 #endif
+
+#define TRY_OR_RETURN_UNEXPECTED_ERROR(EXPECTED)                                                                  \
+    do {                                                                                                          \
+        if (auto&& meadow_result = (EXPECTED); !meadow_result.has_value()) {                                      \
+            static_assert(                                                                                        \
+              std::is_rvalue_reference_v<decltype(TMP_VAR)>, "EXPECTED should be a prvalue, like a function call" \
+            );                                                                                                    \
+            return std::unexpected(std::move(meadow_result.error()));                                             \
+        }                                                                                                         \
+    } while (0)
+
+#define MEADOW_TRY_ASSIGN_OR_RETURN_UNEXPECTED_ERROR_INTERNAL(AUTO_REF_TARGET_VAR, EXPECTED, TMP_VAR)     \
+    auto&& TMP_VAR = (EXPECTED);                                                                          \
+    static_assert(                                                                                        \
+      std::is_rvalue_reference_v<decltype(TMP_VAR)>, "EXPECTED should be a prvalue, like a function call" \
+    );                                                                                                    \
+    if (!TMP_VAR.has_value()) {                                                                           \
+        return std::unexpected(std::move(TMP_VAR.error()));                                               \
+    }                                                                                                     \
+    AUTO_REF_TARGET_VAR = *TMP_VAR
+
+// Executes the `EXPECTED` expression which returns an expected rvalue. On error, `return unexpected(result.error())`
+// Otherwise `auto& TARGET_VAR = *result`
+// Note: don't use this macro as a single statement: WRONG: `if (cond) TRY_ASSIGN_OR_RETURN_UNEXPECTED_ERROR(...);`
+#define TRY_ASSIGN_OR_RETURN_UNEXPECTED_ERROR(TARGET_VAR, EXPECTED)       \
+    MEADOW_TRY_ASSIGN_OR_RETURN_UNEXPECTED_ERROR_INTERNAL(                \
+      auto& TARGET_VAR, EXPECTED, MEADOW_PP_CAT(__tmp_var__, __COUNTER__) \
+    )
+
+// Executes the `EXPECTED` expression which returns an expected rvalue. On error, `return unexpected(result.error())`
+// Otherwise `const auto& TARGET_VAR = *result`
+// Note: don't use this macro as a single statement: WRONG: `if (cond) TRY_ASSIGN_OR_RETURN_UNEXPECTED_ERROR(...);`
+#define TRY_CONST_ASSIGN_OR_RETURN_UNEXPECTED_ERROR(TARGET_VAR, EXPECTED)       \
+    MEADOW_TRY_ASSIGN_OR_RETURN_UNEXPECTED_ERROR_INTERNAL(                      \
+      const auto& TARGET_VAR, EXPECTED, MEADOW_PP_CAT(__tmp_var__, __COUNTER__) \
+    )
 
 // Hash
 
