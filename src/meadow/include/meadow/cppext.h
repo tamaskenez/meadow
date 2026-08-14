@@ -288,17 +288,18 @@ inline void TRY_OR_FAIL(std::expected<void, std::string> X)
 }
 #endif
 
-#define TRY_OR_RETURN_UNEXPECTED_ERROR(EXPECTED)                                                                  \
-    do {                                                                                                          \
-        if (auto&& meadow_result = (EXPECTED); !meadow_result.has_value()) {                                      \
-            static_assert(                                                                                        \
-              std::is_rvalue_reference_v<decltype(TMP_VAR)>, "EXPECTED should be a prvalue, like a function call" \
-            );                                                                                                    \
-            return std::unexpected(std::move(meadow_result.error()));                                             \
-        }                                                                                                         \
+#define TRY_OR_RETURN_UNEXPECTED(EXPECTED)                                   \
+    do {                                                                     \
+        if (auto&& meadow_result = (EXPECTED); !meadow_result.has_value()) { \
+            static_assert(                                                   \
+              std::is_rvalue_reference_v<decltype(meadow_result)>,           \
+              "EXPECTED should be a prvalue, like a function call"           \
+            );                                                               \
+            return std::unexpected(std::move(meadow_result.error()));        \
+        }                                                                    \
     } while (0)
 
-#define MEADOW_TRY_ASSIGN_OR_RETURN_UNEXPECTED_ERROR_INTERNAL(AUTO_REF_TARGET_VAR, EXPECTED, TMP_VAR)     \
+#define MEADOW_TRY_ASSIGN_OR_RETURN_UNEXPECTED(LHS, EXPECTED, TMP_VAR)                                    \
     auto&& TMP_VAR = (EXPECTED);                                                                          \
     static_assert(                                                                                        \
       std::is_rvalue_reference_v<decltype(TMP_VAR)>, "EXPECTED should be a prvalue, like a function call" \
@@ -306,23 +307,14 @@ inline void TRY_OR_FAIL(std::expected<void, std::string> X)
     if (!TMP_VAR.has_value()) {                                                                           \
         return std::unexpected(std::move(TMP_VAR.error()));                                               \
     }                                                                                                     \
-    AUTO_REF_TARGET_VAR = *TMP_VAR
+    LHS = std::move(*TMP_VAR)
 
 // Executes the `EXPECTED` expression which returns an expected rvalue. On error, `return unexpected(result.error())`
-// Otherwise `auto& TARGET_VAR = *result`
-// Note: don't use this macro as a single statement: WRONG: `if (cond) TRY_ASSIGN_OR_RETURN_UNEXPECTED_ERROR(...);`
-#define TRY_ASSIGN_OR_RETURN_UNEXPECTED_ERROR(TARGET_VAR, EXPECTED)       \
-    MEADOW_TRY_ASSIGN_OR_RETURN_UNEXPECTED_ERROR_INTERNAL(                \
-      auto& TARGET_VAR, EXPECTED, MEADOW_PP_CAT(__tmp_var__, __COUNTER__) \
-    )
-
-// Executes the `EXPECTED` expression which returns an expected rvalue. On error, `return unexpected(result.error())`
-// Otherwise `const auto& TARGET_VAR = *result`
-// Note: don't use this macro as a single statement: WRONG: `if (cond) TRY_ASSIGN_OR_RETURN_UNEXPECTED_ERROR(...);`
-#define TRY_CONST_ASSIGN_OR_RETURN_UNEXPECTED_ERROR(TARGET_VAR, EXPECTED)       \
-    MEADOW_TRY_ASSIGN_OR_RETURN_UNEXPECTED_ERROR_INTERNAL(                      \
-      const auto& TARGET_VAR, EXPECTED, MEADOW_PP_CAT(__tmp_var__, __COUNTER__) \
-    )
+// Otherwise `LHS = std::move(*result)`
+// LHS can be an lvalue or the left-hand side of an assignment expression (e.g. auto var, auto&& var, const auto& var,
+// ...) Note: don't use this macro as a single statement: WRONG: `if (cond) TRY_ASSIGN_OR_RETURN_UNEXPECTED_ERROR(...);`
+#define TRY_ASSIGN_OR_RETURN_UNEXPECTED(LHS, EXPECTED) \
+    MEADOW_TRY_ASSIGN_OR_RETURN_UNEXPECTED(LHS, EXPECTED, MEADOW_PP_CAT(__tmp_var__, __COUNTER__))
 
 // Hash
 
