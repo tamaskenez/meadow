@@ -506,3 +506,15 @@ TEST(matlab, logspace)
         ASSERT_EQ(matlab::logspace(1, -1, 3), expected);
     }
 }
+
+static void test_datenum(int year, int month, int day, double expected)
+{
+    EXPECT_EQ(matlab::datenum(year, month, day), expected);
+}
+
+TEST(matlab, datenum)
+{
+    test_datenum(1900, 1, 1, 693962);
+    test_datenum(1999, 12, 31, 730485);
+    test_datenum(2021, 12, 23, 738513);
+}

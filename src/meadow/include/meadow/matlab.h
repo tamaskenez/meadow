@@ -233,4 +233,8 @@ std::vector<double> logspace(double e1, double e2, size_t n);
 
 double sinc(double x);
 
+double datenum(std::chrono::local_days d);
+// Invalid dates are undefined behavior (asserted on ymd.ok()).
+double datenum(std::chrono::year_month_day ymd);
+double datenum(int y, int m, int d);
 } // namespace matlab

@@ -16,7 +16,6 @@
 
 namespace matlab
 {
-
 namespace detail
 {
 std::expected<void, std::string>
@@ -154,6 +153,7 @@ array<T, 2> polyfit1(span<const T> xs, span<const T> ys)
 }
 
 template array<float, 2> polyfit1(span<const float> xs, span<const float> ys);
+
 template array<double, 2> polyfit1(span<const double> xs, span<const double> ys);
 
 template<class C, class X>
@@ -172,8 +172,11 @@ decltype(std::declval<C>() * std::declval<X>()) polyval(std::span<const C> cs, X
 }
 
 template float polyval(std::span<const float> cs, float x);
+
 template double polyval(std::span<const double> cs, double x);
+
 template std::complex<double> polyval(std::span<const std::complex<double>> cs, std::complex<double> x);
+
 template std::complex<double> polyval(std::span<const double> cs, std::complex<double> x);
 
 template<class T>
@@ -190,6 +193,7 @@ std::vector<T> polyder(std::span<const T> cs)
 }
 
 template std::vector<float> polyder(std::span<const float> cs);
+
 template std::vector<double> polyder(std::span<const double> cs);
 
 namespace detail
@@ -209,6 +213,7 @@ void polyder_noalloc_core(std::span<const T> cs, std::span<T> r)
 }
 
 template void polyder_noalloc_core(std::span<const float> cs, std::span<float> r);
+
 template void polyder_noalloc_core(std::span<const double> cs, std::span<double> r);
 } // namespace detail
 
@@ -231,6 +236,7 @@ std::inplace_vector<T, 2> real_roots2(std::span<const T, 3> cs)
 }
 
 template std::inplace_vector<float, 2> real_roots2(std::span<const float, 3> cs);
+
 template std::inplace_vector<double, 2> real_roots2(std::span<const double, 3> cs);
 
 #if MEADOW_HAS_EIGEN == 1
@@ -320,4 +326,27 @@ double sinc(double x)
     return detail::sinc_pi(x * num::pi);
 }
 
+namespace
+{
+// 1970-01-01, the day std::chrono counts from, as a MATLAB serial date number.
+constexpr double k_reference_datenum_value = 730486.0;
+constexpr auto k_reference_datenum_local_days =
+  chr::local_days(chr::year_month_day{chr::year(2000), chr::month{1}, chr::day{1}});
+} // namespace
+
+double datenum(chr::local_days d)
+{
+    return ifcast<double>((d - k_reference_datenum_local_days).count()) + k_reference_datenum_value;
+}
+
+double datenum(chr::year_month_day ymd)
+{
+    assert(ymd.ok());
+    return datenum(chr::local_days(ymd));
+}
+
+double datenum(int y, int m, int d)
+{
+    return datenum(chr::year_month_day{chr::year(y), chr::month(iicast<unsigned>(m)), chr::day(iicast<unsigned>(d))});
+}
 } // namespace matlab
