@@ -6,6 +6,67 @@
   #include "meadow/eigen_dense.h"
 #endif
 
+void RunningStat::operator()(double sample)
+{
+    assert(std::isfinite(sample));
+
+    ++num_samples;
+    const double delta = sample - running_mean;
+    running_mean += delta / ifcast<double>(num_samples);
+    sum_sq_dev += delta * (sample - running_mean);
+    min_sample = std::min(min_sample, sample);
+    max_sample = std::max(max_sample, sample);
+}
+
+void RunningStat::reset()
+{
+    *this = RunningStat();
+}
+
+size_t RunningStat::count() const
+{
+    return num_samples;
+}
+
+double RunningStat::mean() const
+{
+    assert(num_samples > 0);
+    return num_samples == 0 ? NAN : running_mean;
+}
+
+double RunningStat::min() const
+{
+    assert(num_samples > 0);
+    return num_samples == 0 ? NAN : min_sample;
+}
+
+double RunningStat::max() const
+{
+    assert(num_samples > 0);
+    return num_samples == 0 ? NAN : max_sample;
+}
+
+double RunningStat::range() const
+{
+    return max() - min();
+}
+
+double RunningStat::var(VarianceNorm norm) const
+{
+    const size_t min_samples = norm == VarianceNorm::sample ? 2 : 1;
+    assert(num_samples >= min_samples);
+    if (num_samples < min_samples) {
+        return NAN;
+    }
+    const auto n = ifcast<double>(num_samples);
+    return sum_sq_dev / (norm == VarianceNorm::sample ? n - 1 : n);
+}
+
+double RunningStat::stddev(VarianceNorm norm) const
+{
+    return sqrt(var(norm));
+}
+
 std::pair<double, double> extremumOfParabola(double ym1, double y0, double yp1)
 {
     const double a = (ym1 + yp1) / 2 - y0;

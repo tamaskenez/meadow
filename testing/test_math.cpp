@@ -237,3 +237,92 @@ TEST(math, ifloor_frac)
     test_ifloor_frac(-1.0, -1, 0);
     test_ifloor_frac(-1.5, -2, 0.5);
 }
+
+namespace
+{
+RunningStat makeRunningStat(std::initializer_list<double> samples)
+{
+    RunningStat rs;
+    for (auto s : samples) {
+        rs(s);
+    }
+    return rs;
+}
+} // namespace
+
+// The queries assert on an insufficient number of samples, they return NaN only when asserts are disabled.
+TEST(math, RunningStat_empty)
+{
+    const RunningStat rs;
+    EXPECT_EQ(rs.count(), 0u);
+#ifdef NDEBUG
+    EXPECT_TRUE(std::isnan(rs.mean()));
+    EXPECT_TRUE(std::isnan(rs.var()));
+    EXPECT_TRUE(std::isnan(rs.var(VarianceNorm::population)));
+    EXPECT_TRUE(std::isnan(rs.stddev()));
+    EXPECT_TRUE(std::isnan(rs.min()));
+    EXPECT_TRUE(std::isnan(rs.max()));
+    EXPECT_TRUE(std::isnan(rs.range()));
+#endif
+}
+
+TEST(math, RunningStat_single_sample)
+{
+    const auto rs = makeRunningStat({3.5});
+    EXPECT_EQ(rs.count(), 1u);
+    EXPECT_DOUBLE_EQ(rs.mean(), 3.5);
+#ifdef NDEBUG
+    EXPECT_TRUE(std::isnan(rs.var()));
+#endif
+    EXPECT_DOUBLE_EQ(rs.var(VarianceNorm::population), 0.0);
+    EXPECT_DOUBLE_EQ(rs.stddev(VarianceNorm::population), 0.0);
+    EXPECT_DOUBLE_EQ(rs.min(), 3.5);
+    EXPECT_DOUBLE_EQ(rs.max(), 3.5);
+    EXPECT_DOUBLE_EQ(rs.range(), 0.0);
+}
+
+TEST(math, RunningStat_moments)
+{
+    const auto rs = makeRunningStat({2, 4, 4, 4, 5, 5, 7, 9});
+    EXPECT_EQ(rs.count(), 8u);
+    EXPECT_DOUBLE_EQ(rs.mean(), 5.0);
+    EXPECT_DOUBLE_EQ(rs.var(VarianceNorm::population), 4.0);
+    EXPECT_DOUBLE_EQ(rs.stddev(VarianceNorm::population), 2.0);
+    EXPECT_DOUBLE_EQ(rs.var(), 32.0 / 7);
+    EXPECT_DOUBLE_EQ(rs.stddev(), sqrt(32.0 / 7));
+    EXPECT_DOUBLE_EQ(rs.min(), 2.0);
+    EXPECT_DOUBLE_EQ(rs.max(), 9.0);
+    EXPECT_DOUBLE_EQ(rs.range(), 7.0);
+}
+
+TEST(math, RunningStat_negative_samples)
+{
+    const auto rs = makeRunningStat({-1.0, -3.0, 2.0});
+    EXPECT_DOUBLE_EQ(rs.mean(), -2.0 / 3);
+    EXPECT_DOUBLE_EQ(rs.var(), 19.0 / 3);
+    EXPECT_DOUBLE_EQ(rs.min(), -3.0);
+    EXPECT_DOUBLE_EQ(rs.max(), 2.0);
+    EXPECT_DOUBLE_EQ(rs.range(), 5.0);
+}
+
+// The variance of samples with a large offset is where the naive sum-of-squares formula loses all precision.
+TEST(math, RunningStat_large_offset)
+{
+    const double offset = 1e9;
+    const auto rs = makeRunningStat({offset + 4, offset + 7, offset + 13, offset + 16});
+    EXPECT_DOUBLE_EQ(rs.mean(), offset + 10);
+    EXPECT_DOUBLE_EQ(rs.var(), 30.0);
+    EXPECT_DOUBLE_EQ(rs.var(VarianceNorm::population), 22.5);
+}
+
+TEST(math, RunningStat_reset)
+{
+    auto rs = makeRunningStat({1.0, 2.0});
+    rs.reset();
+    EXPECT_EQ(rs.count(), 0u);
+
+    rs(8.0);
+    EXPECT_EQ(rs.count(), 1u);
+    EXPECT_DOUBLE_EQ(rs.mean(), 8.0);
+    EXPECT_DOUBLE_EQ(rs.max(), 8.0);
+}

@@ -201,3 +201,36 @@ pair<I, T> ifloor_frac(T x)
     const auto integral = floor(x);
     return pair(detail::float_to_int_cast_core<I>(integral), x - integral);
 }
+
+enum class VarianceNorm {
+    sample,    // Normalize by count() - 1
+    population // Normalize by count()
+};
+
+// Statistics of a continuously sampled process, updated incrementally, without storing the samples.
+class RunningStat
+{
+public:
+    // Adds a sample. Samples must be finite.
+    void operator()(double sample);
+    void reset();
+
+    NODIS size_t count() const;
+
+    // Precond: count() > 0. Return NaN if the precondition is not met.
+    NODIS double mean() const;
+    NODIS double min() const;
+    NODIS double max() const;
+    NODIS double range() const;
+    // Precond: count() > 1 with VarianceNorm::sample, count() > 0 with VarianceNorm::population. Return NaN if the
+    // precondition is not met.
+    NODIS double var(VarianceNorm norm = VarianceNorm::sample) const;
+    NODIS double stddev(VarianceNorm norm = VarianceNorm::sample) const;
+
+private:
+    size_t num_samples = 0;
+    double running_mean = 0;
+    double sum_sq_dev = 0; // Sum of the squared deviations from the running mean.
+    double min_sample = INFINITY;
+    double max_sample = -INFINITY;
+};
