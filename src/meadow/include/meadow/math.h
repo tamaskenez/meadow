@@ -187,6 +187,37 @@ std::vector<T> regspace(T begin, T step, T end)
 }
 
 template<class T>
+    requires std::integral<T>
+std::vector<T> regspace(T begin, T step, T end)
+{
+    std::vector<T> result;
+    if (step < T(0)) {
+        if (begin < end) {
+            assert(false);
+        } else {
+            const auto n = iicast<size_t>((end - begin) / step) + 1;
+            result.reserve(n);
+            for (size_t i = 0; i < n; ++i) {
+                result.push_back(begin + iicast<T>(i) * step);
+            }
+        }
+    } else if (T(0) < step) {
+        if (begin > end) {
+            assert(false);
+        } else {
+            auto n = iicast<size_t>((end - begin) / step) + 1;
+            result.reserve(n);
+            for (size_t i = 0; i < n; ++i) {
+                result.push_back(begin + iicast<T>(i) * step);
+            }
+        }
+    } else {
+        assert(false);
+    }
+    return result;
+}
+
+template<class T>
     requires std::floating_point<T>
 pair<T, T> floor_frac(T x)
 {

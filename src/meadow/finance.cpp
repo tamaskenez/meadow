@@ -39,3 +39,22 @@ double sharpe(
 
     return excess.mean() / excess.stddev() * sqrt(periods_per_year);
 }
+
+double sharpe(
+  std::span<const double> asset,
+  double riskless,
+  double periods_per_year,
+  SharpeInputType input,
+  SharpeAggregation aggregation
+)
+{
+    CHECK(asset.size() >= 2);
+    CHECK(periods_per_year > 0);
+
+    RunningStat excess;
+    for (const auto asset_i : asset) {
+        excess(excessReturn(asset_i, riskless, input, aggregation));
+    }
+
+    return excess.mean() / excess.stddev() * sqrt(periods_per_year);
+}

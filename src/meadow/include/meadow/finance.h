@@ -27,3 +27,12 @@ double sharpe(
   SharpeInputType input = SharpeInputType::return_,
   SharpeAggregation aggregation = SharpeAggregation::arithmetic
 );
+
+// Same function, except riskless is constant along the range.
+double sharpe(
+  std::span<const double> asset,
+  double riskless, // return or return factor per period
+  double periods_per_year = 1.0,
+  SharpeInputType input = SharpeInputType::return_,
+  SharpeAggregation aggregation = SharpeAggregation::arithmetic
+);
