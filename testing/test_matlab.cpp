@@ -518,3 +518,119 @@ TEST(matlab, datenum)
     test_datenum(1999, 12, 31, 730485);
     test_datenum(2021, 12, 23, 738513);
 }
+
+TEST(matlab, corr)
+{
+    const auto xs = vector<double>({1, 2, 3, 4, 5});
+    {
+        const auto ys = vector<double>({2, 1, 4, 3, 7});
+        EXPECT_DOUBLE_EQ(matlab::corr(xs, ys), 0.8241633836921342);
+    }
+    {
+        // Perfect positive and negative correlation.
+        const auto ys = vector<double>({3, 5, 7, 9, 11});
+        EXPECT_DOUBLE_EQ(matlab::corr(xs, ys), 1.0);
+        const auto zs = vector<double>({11, 9, 7, 5, 3});
+        EXPECT_DOUBLE_EQ(matlab::corr(xs, zs), -1.0);
+    }
+    {
+        // A constant input has zero variance.
+        const auto ys = vector<double>({2, 2, 2, 2, 2});
+        EXPECT_TRUE(std::isnan(matlab::corr(xs, ys)));
+    }
+    {
+        const auto ys = vector<double>({7.0});
+        EXPECT_TRUE(std::isnan(matlab::corr(span<const double>(xs).first(1), ys)));
+    }
+}
+
+TEST(matlab, corr2)
+{
+    const auto xs = {1.0, 3.0, 1.0, 4.0, 1.0, 5.0};
+    const auto ys = {2.0, 5.0, 8.0, 5.0, 8.0, 4.0};
+    const auto a = matlab::corr(xs, ys);
+    EXPECT_NEAR(a, -0.340083758831913, 1e-15);
+}
+
+TEST(matlab, cov)
+{
+    const auto xs = vector<double>({1, 3, 1, 4, 1, 5});
+    const auto ys = vector<double>({2, 5, 8, 5, 8, 4});
+    {
+        // Default is the sample variance, w = 0.
+        const auto c = matlab::cov(xs, ys);
+        EXPECT_EQ(c, matlab::cov(xs, ys, 0));
+        EXPECT_DOUBLE_EQ(c[0][0], 3.1);
+        EXPECT_DOUBLE_EQ(c[0][1], -1.3999999999999997);
+        EXPECT_DOUBLE_EQ(c[1][0], c[0][1]);
+        EXPECT_DOUBLE_EQ(c[1][1], 5.466666666666667);
+    }
+    {
+        const auto c = matlab::cov(xs, ys, 1);
+        EXPECT_DOUBLE_EQ(c[0][0], 2.5833333333333335);
+        EXPECT_DOUBLE_EQ(c[0][1], -1.1666666666666663);
+        EXPECT_DOUBLE_EQ(c[1][0], c[0][1]);
+        EXPECT_DOUBLE_EQ(c[1][1], 4.555555555555555);
+    }
+    {
+        // cov(xs, xs) is the variance of xs in every element.
+        const auto c = matlab::cov(xs, xs);
+        EXPECT_DOUBLE_EQ(c[0][0], 3.1);
+        EXPECT_DOUBLE_EQ(c[0][1], 3.1);
+        EXPECT_DOUBLE_EQ(c[1][0], 3.1);
+        EXPECT_DOUBLE_EQ(c[1][1], 3.1);
+    }
+    {
+        // A single sample has zero population variance.
+        const auto c = matlab::cov(span<const double>(xs).first(1), span<const double>(ys).first(1), 1);
+        EXPECT_EQ(
+          c,
+          (std::array<std::array<double, 2>, 2>{
+            {{0, 0}, {0, 0}}
+        })
+        );
+    }
+}
+
+TEST(matlab, cov2)
+{
+    const auto xs = {1.0, 3.0, 1.0, 4.0, 1.0, 5.0};
+    const auto ys = {2.0, 5.0, 8.0, 5.0, 8.0, 4.0};
+    const auto a = matlab::cov(xs, ys);
+    const auto a0 = matlab::cov(xs, ys, 0);
+    const auto a1 = matlab::cov(xs, ys, 1);
+    constexpr double eps = 1e-15;
+    EXPECT_EQ(a, a0);
+    EXPECT_NEAR(a0[0][0], 3.1, eps);
+    EXPECT_NEAR(a0[0][1], -1.4, eps);
+    EXPECT_EQ(a0[1][0], a0[1][0]);
+    EXPECT_NEAR(a0[1][1], 5.466666666666667, eps);
+    EXPECT_NEAR(a1[0][0], 2.583333333333333, eps);
+    EXPECT_NEAR(a1[0][1], -1.166666666666666, eps);
+    EXPECT_EQ(a1[1][0], a1[1][0]);
+    EXPECT_NEAR(a1[1][1], 4.555555555555556, eps);
+}
+
+TEST(matlab, var)
+{
+    const auto xs = vector<double>({1, 3, 1, 4, 1, 5});
+    // Default is the sample variance, w = 0.
+    EXPECT_DOUBLE_EQ(matlab::var(xs), matlab::var(xs, 0));
+    EXPECT_DOUBLE_EQ(matlab::var(xs), 3.1);
+    EXPECT_DOUBLE_EQ(matlab::var(xs, 1), 2.5833333333333335);
+    // Same as the diagonal of cov.
+    EXPECT_DOUBLE_EQ(matlab::var(xs), matlab::cov(xs, xs)[0][0]);
+    // A single sample has zero population variance.
+    EXPECT_DOUBLE_EQ(matlab::var(span<const double>(xs).first(1), 1), 0.0);
+    // A constant input has zero variance.
+    EXPECT_DOUBLE_EQ(matlab::var(vector<double>({7, 7, 7})), 0.0);
+}
+
+TEST(matlab, std)
+{
+    const auto xs = vector<double>({1, 3, 1, 4, 1, 5});
+    EXPECT_DOUBLE_EQ(matlab::std(xs), matlab::std(xs, 0));
+    EXPECT_DOUBLE_EQ(matlab::std(xs), 1.760681686165901);
+    EXPECT_DOUBLE_EQ(matlab::std(xs, 1), 1.6072751268321592);
+    EXPECT_DOUBLE_EQ(matlab::std(xs), sqrt(matlab::var(xs)));
+}

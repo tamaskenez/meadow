@@ -237,4 +237,29 @@ double datenum(std::chrono::local_days d);
 // Invalid dates are undefined behavior (asserted on ymd.ok()).
 double datenum(std::chrono::year_month_day ymd);
 double datenum(int y, int m, int d);
+
+// Return Pearson's Linear Correlation Coefficient:
+//     xs2 = xs - mean(xs);
+//     ys2 = ys - mean(ys);
+//     sum(xs2 .* ys2) / sqrt(sum(xs2.^2) * sum(ys2.^2))
+// Precond: xs and ys have the same, non-zero size. Return NaN if either input is constant.
+double corr(span<const double> xs, span<const double> ys);
+
+// Return 2 x 2 covariance matrix.
+//     [var(xs)       cov(xs, ys)
+//      cov(xs, ys)   var(ys)   ]
+// w = 0 means sample variance (normalize by N - 1), w = 1 is population variance (N)
+// Precond: xs and ys have the same size, at least 2 elements with w = 0, at least 1 with w = 1.
+std::array<std::array<double, 2>, 2> cov(span<const double> xs, span<const double> ys, int w = 0);
+
+// Return standard deviation
+// w = 0 means sample variance (normalize by N - 1), w = 1 is population variance (N)
+// Precond: xs has at least 2 elements with w = 0, at least 1 with w = 1.
+double std(span<const double> xs, int w = 0);
+
+// Return variance
+// w = 0 means sample variance (normalize by N - 1), w = 1 is population variance (N)
+// Precond: xs has at least 2 elements with w = 0, at least 1 with w = 1.
+double var(span<const double> xs, int w = 0);
+
 } // namespace matlab

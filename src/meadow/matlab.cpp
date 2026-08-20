@@ -349,4 +349,67 @@ double datenum(int y, int m, int d)
 {
     return datenum(chr::year_month_day{chr::year(y), chr::month(iicast<unsigned>(m)), chr::day(iicast<unsigned>(d))});
 }
+
+namespace
+{
+struct DeviationSums {
+    double sxx, sxy, syy;
+};
+
+// Divisor of the deviation sums for the normalization argument w.
+double normalizationDivisor(size_t n, int w)
+{
+    CHECK(w == 0 || w == 1);
+    return ifcast<double>(n) - (w == 0 ? 1.0 : 0.0);
+}
+
+// Sums of the squared and cross deviations from the means of xs and ys.
+DeviationSums deviationSums(span<const double> xs, span<const double> ys)
+{
+    CHECK(xs.size() == ys.size());
+    const auto mean_x = mean(xs);
+    const auto mean_y = mean(ys);
+    DeviationSums r{0, 0, 0};
+    for (auto&& [x, y] : vi::zip(xs, ys)) {
+        const auto dx = x - mean_x;
+        const auto dy = y - mean_y;
+        r.sxx += square(dx);
+        r.sxy += dx * dy;
+        r.syy += square(dy);
+    }
+    return r;
+}
+} // namespace
+
+double corr(span<const double> xs, span<const double> ys)
+{
+    const auto s = deviationSums(xs, ys);
+    return s.sxy / sqrt(s.sxx * s.syy);
+}
+
+array<array<double, 2>, 2> cov(span<const double> xs, span<const double> ys, int w)
+{
+    const auto s = deviationSums(xs, ys);
+    const auto norm = normalizationDivisor(xs.size(), w);
+    return {
+      array<double, 2>{s.sxx / norm, s.sxy / norm},
+       array<double, 2>{s.sxy / norm, s.syy / norm}
+    };
+}
+
+double var(span<const double> xs, int w)
+{
+    const auto norm = normalizationDivisor(xs.size(), w);
+    const auto mean_x = mean(xs);
+    double sxx = 0;
+    for (auto x : xs) {
+        sxx += square(x - mean_x);
+    }
+    return sxx / norm;
+}
+
+double std(span<const double> xs, int w)
+{
+    return sqrt(var(xs, w));
+}
 } // namespace matlab
