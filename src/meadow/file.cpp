@@ -1,36 +1,39 @@
 #include "meadow/file.h"
-#include "meadow/errno.h"
 
-expected<string, string> read_file_to_string(const fs::path& path)
+#include <fstream>
+
+expected<string, string> read_file_to_string(const fs::path& path, IfMissing if_missing)
 {
     std::error_code ec;
-    auto size = file_size(path, ec);
+    const auto size = fs::file_size(path, ec);
     if (ec) {
-        return unexpected(ec.message());
+        if (ec == std::errc::no_such_file_or_directory && if_missing == IfMissing::return_empty) {
+            return string();
+        }
+        return unexpected(format("Can't access {}: {}", path.string(), ec.message()));
     }
-    string result(size, 0);
-    auto f_or = try_fopen(path.string().c_str(), "rb");
-    if (!f_or) {
-        return unexpected(strerrno_or_int(f_or.error()));
+    std::ifstream f(path, std::ios::binary);
+    if (!f) {
+        return unexpected(format("Can't open {}", path.string()));
     }
-    auto bytes_read = fread(result.data(), 1, size, *f_or);
-    fclose(*f_or);
-    if (bytes_read != size) {
-        return unexpected(format("read {} bytes instead of {}", bytes_read, size));
+    string result(size, '\0');
+    f.read(result.data(), iicast<std::streamsize>(size));
+    if (!f) {
+        return unexpected(format("Can't read {}: read {} bytes instead of {}", path.string(), f.gcount(), size));
     }
     return result;
 }
 
 expected<void, string> write_string_to_file(string_view sv, const fs::path& path)
 {
-    auto f_or = try_fopen(path.string().c_str(), "wb");
-    if (!f_or) {
-        return unexpected(strerrno_or_int(f_or.error()));
+    std::ofstream f(path, std::ios::binary | std::ios::trunc);
+    if (!f) {
+        return unexpected(format("Can't open {} for writing", path.string()));
     }
-    auto bytes_written = fwrite(sv.data(), 1, sv.size(), *f_or);
-    fclose(*f_or);
-    if (bytes_written != sv.size()) {
-        return unexpected(format("wrote {} bytes instead of {}", bytes_written, sv.size()));
+    f.write(sv.data(), iicast<std::streamsize>(sv.size()));
+    f.close();
+    if (!f) {
+        return unexpected(format("Can't write {}", path.string()));
     }
     return {};
 }
