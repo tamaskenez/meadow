@@ -275,7 +275,7 @@ constexpr auto ucast(From f)
 
 #if MEADOW_HAS_ABSL == 1
 template<class R>
-R TRY_OR_FAIL(std::expected<R, std::string> X)
+NODIS R TRY_OR_FAIL(std::expected<R, std::string> X)
 {
     LOG_IF(FATAL, !X) << X.error();
     return MOVE(*X);
@@ -287,6 +287,23 @@ inline void TRY_OR_FAIL(std::expected<void, std::string> X)
     LOG_IF(FATAL, !X) << X.error();
 }
 #endif
+
+template<class R>
+NODIS R TRY_OR_RUNTIME_ERROR(std::expected<R, std::string> X)
+{
+    if (X) {
+        return MOVE(*X);
+    }
+    throw std::runtime_error(X.error());
+}
+
+template<>
+inline void TRY_OR_RUNTIME_ERROR(std::expected<void, std::string> X)
+{
+    if (!X) {
+        throw std::runtime_error(X.error());
+    }
+}
 
 #define TRY_OR_RETURN_UNEXPECTED(EXPECTED)                                   \
     do {                                                                     \
