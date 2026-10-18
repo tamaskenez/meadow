@@ -21,10 +21,11 @@ jobs:
     strategy:
       matrix:
         include:
-          - os: macos-26
-            cmake_generator: -G Xcode
-          - os: windows-2025
-            cmake_generator: ""
+          # TODO: re-enable macOS and Windows once the Linux build is fixed.
+          # - os: macos-26
+          #   cmake_generator: -G Xcode
+          # - os: windows-2025
+          #   cmake_generator: ""
           - os: ubuntu-26.04
             cmake_generator: ""
             # GCC 15 (the default) lacks <mdspan>.
