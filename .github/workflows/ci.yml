@@ -27,6 +27,8 @@ jobs:
             cmake_generator: ""
           - os: ubuntu-26.04
             cmake_generator: ""
+            # GCC 15 (the default) lacks <mdspan>.
+            gcc_version: 16
 
     env:
       BUILD_TYPE: ${{ inputs.build_type || 'Debug' }}
@@ -34,12 +36,21 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
+      - name: Install GCC ${{ matrix.gcc_version }}
+        if: matrix.gcc_version
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y g++-${{ matrix.gcc_version }}
+          echo "CC=gcc-${{ matrix.gcc_version }}" >> "$GITHUB_ENV"
+          echo "CXX=g++-${{ matrix.gcc_version }}" >> "$GITHUB_ENV"
+          g++-${{ matrix.gcc_version }} --version
+
       - name: Cache Conan packages
         id: conan-cache
         uses: actions/cache@v5
         with:
           path: id
-          key: conan-${{ matrix.os }}-${{ hashFiles('conanfile.txt', 'conan/**') }}
+          key: conan-${{ matrix.os }}${{ matrix.gcc_version && format('-gcc{0}', matrix.gcc_version) || '' }}-${{ hashFiles('conanfile.txt', 'conan/**') }}
 
       - name: Install Conan
         if: steps.conan-cache.outputs.cache-hit != 'true'
