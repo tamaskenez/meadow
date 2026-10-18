@@ -25,6 +25,8 @@ jobs:
             cmake_generator: -G Xcode
           - os: windows-latest
             cmake_generator: ""
+          - os: ubuntu-26.04
+            cmake_generator: ""
 
     env:
       BUILD_TYPE: ${{ inputs.build_type || 'Debug' }}
@@ -49,7 +51,7 @@ jobs:
         run: ./1_build_conan.sh --use-deployer
 
       - name: Configure
-        run: cmake -S . -B _b ${{ matrix.cmake_generator }}
+        run: cmake -S . -B _b ${{ matrix.cmake_generator }} -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }}
 
       - name: Build
         run: cmake --build _b --config ${{ env.BUILD_TYPE }}
