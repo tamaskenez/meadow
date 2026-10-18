@@ -368,7 +368,7 @@ void hash_range(std::size_t& seed, It first, It last)
 namespace std
 {
 template<class A, class B>
-struct std::hash<std::pair<A, B>> {
+struct hash<std::pair<A, B>> {
     std::size_t operator()(std::pair<A, B> const& s) const noexcept
     {
         auto h = ::hash_value(s.first);
@@ -451,4 +451,5 @@ auto signed_subtract(X x, Y y)
     }
 }
 
-NODIS expected<FILE*, errno_t> try_fopen(const char* filename, const char* mode);
+// Returns errno (or the fopen_s error, which is also an errno value) on failure.
+NODIS expected<FILE*, int> try_fopen(const char* filename, const char* mode);
