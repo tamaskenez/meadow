@@ -21,9 +21,9 @@ jobs:
     strategy:
       matrix:
         include:
-          - os: macos-latest
+          - os: macos-26
             cmake_generator: -G Xcode
-          - os: windows-latest
+          - os: windows-2025
             cmake_generator: ""
           - os: ubuntu-26.04
             cmake_generator: ""
@@ -39,7 +39,7 @@ jobs:
         uses: actions/cache@v5
         with:
           path: id
-          key: conan-${{ matrix.os }}-${{ hashFiles('conanfile.txt') }}
+          key: conan-${{ matrix.os }}-${{ hashFiles('conanfile.txt', 'conan/**') }}
 
       - name: Install Conan
         if: steps.conan-cache.outputs.cache-hit != 'true'

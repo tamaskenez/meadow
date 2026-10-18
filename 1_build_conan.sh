@@ -18,6 +18,9 @@ if [[ $use_deployer -eq 1 ]]; then
 	deployer_flags=(--deployer=full_deploy --deployer-folder=id)
 fi
 
+# Local recipe, see conan/abseil/conandata.yml
+conan export conan/abseil --version 20261017.0-git.017286b
+
 for build_type in Debug Release; do
 	conan install conanfile.txt \
 		-b missing \
