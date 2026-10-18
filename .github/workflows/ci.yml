@@ -50,7 +50,7 @@ jobs:
         uses: actions/cache@v5
         with:
           path: id
-          key: conan-${{ matrix.os }}${{ matrix.gcc_version && format('-gcc{0}', matrix.gcc_version) || '' }}-${{ hashFiles('conanfile.txt', 'conan/**') }}
+          key: conan-${{ matrix.os }}${{ matrix.gcc_version && format('-gcc{0}', matrix.gcc_version) || '' }}-${{ hashFiles('conanfile.txt', '1_build_conan.sh', 'conan/**') }}
 
       - name: Install Conan
         if: steps.conan-cache.outputs.cache-hit != 'true'

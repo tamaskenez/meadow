@@ -7,8 +7,11 @@ for arg in "$@"; do
 	fi
 done
 
+# Keep in sync with CMAKE_CXX_STANDARD in CMakeLists.txt
 UNAME_S=$(uname -s)
-if [[ $UNAME_S == "Darwin" || $UNAME_S == "Linux" ]]; then
+if [[ $UNAME_S == "Linux" ]]; then
+	cppstd=gnu26
+elif [[ $UNAME_S == "Darwin" ]]; then
 	cppstd=gnu23
 else
 	cppstd=23
