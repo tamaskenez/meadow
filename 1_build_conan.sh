@@ -7,7 +7,8 @@ for arg in "$@"; do
 	fi
 done
 
-if [[ $(uname -s) == "Darwin" ]]; then
+UNAME_S=$(uname -s)
+if [[ $UNAME_S == "Darwin" || $UNAME_S == "Linux" ]]; then
 	cppstd=gnu23
 else
 	cppstd=23
