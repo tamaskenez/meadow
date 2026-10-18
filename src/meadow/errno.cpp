@@ -66,11 +66,6 @@ string strerrno_or_int(int e)
         CASE(ENOTEMPTY)
         CASE(ENOTRECOVERABLE)
         CASE(ENOTSOCK)
-#ifdef __EMSCRIPTEN__
-        static_assert(ENOTSUP == EOPNOTSUPP);
-#else
-        CASE(ENOTSUP)
-#endif
         CASE(ENOTTY)
         CASE(ENXIO)
         CASE(EOPNOTSUPP)
@@ -94,6 +89,10 @@ string strerrno_or_int(int e)
         if (e == EWOULDBLOCK) // Happens if EAGAIN != EWOULDBLOCK
         {
             return "EWOULDBLOCK";
+        }
+        if (e == ENOTSUP) // Happens if ENOTSUP != EOPNOTSUPP
+        {
+            return "ENOTSUP";
         }
         return std::to_string(e);
     }

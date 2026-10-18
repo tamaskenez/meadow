@@ -15,7 +15,12 @@ if(PROJECT_IS_TOP_LEVEL)
     endif()
 
     set(CMAKE_FIND_PACKAGE_PREFER_CONFIG ON)
-    set(CMAKE_CXX_STANDARD 23)
+    # C++26 for GCC: libstdc++ provides std::inplace_vector only in C++26 mode.
+    if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+        set(CMAKE_CXX_STANDARD 26)
+    else()
+        set(CMAKE_CXX_STANDARD 23)
+    endif()
     set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
     option(BUILD_TESTING "Build the testing tree." ON)

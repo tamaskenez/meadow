@@ -6,10 +6,6 @@
 #include <complex>
 #include <numbers>
 
-#ifdef __clang__
-  #pragma clang diagnostic ignored "-Wsign-conversion"
-#endif
-
 namespace matlab
 {
 
@@ -18,11 +14,12 @@ namespace
 
 // Analog Butterworth prototype poles of order N, on the unit circle in the left half-plane.
 // p_k = exp(j * π * (2k + N - 1) / (2N)), k = 1..N
-std::vector<std::complex<double>> analog_proto_poles(int order)
+std::vector<std::complex<double>> analog_proto_poles(size_t order)
 {
     std::vector<std::complex<double>> poles(order);
-    for (int k = 0; k < order; ++k) {
-        double angle = std::numbers::pi * (2.0 * (k + 1) + order - 1) / (2.0 * order);
+    const auto N = ifcast<double>(order);
+    for (size_t k = 0; k < order; ++k) {
+        double angle = std::numbers::pi * (2.0 * ifcast<double>(k + 1) + N - 1) / (2.0 * N);
         poles[k] = std::polar(1.0, angle);
     }
     return poles;
@@ -80,7 +77,7 @@ TransferFunctionCoeffs make_coeffs(
     return {real_coeffs(b), real_coeffs(a)};
 }
 
-TransferFunctionCoeffs butter_lp(int order, double Wn)
+TransferFunctionCoeffs butter_lp(size_t order, double Wn)
 {
     auto poles = analog_proto_poles(order);
     const double wc = 2.0 * std::tan(std::numbers::pi * Wn / 2.0);
@@ -88,13 +85,14 @@ TransferFunctionCoeffs butter_lp(int order, double Wn)
         p *= wc;
 
     std::vector<std::complex<double>> z_poles(order), z_zeros(order, {-1.0, 0.0});
-    for (int i = 0; i < order; ++i)
+    for (size_t i = 0; i < order; ++i) {
         z_poles[i] = bilinear(poles[i]);
+    }
 
     return make_coeffs(z_zeros, z_poles, {1.0, 0.0}); // normalize DC gain to 1
 }
 
-TransferFunctionCoeffs butter_hp(int order, double Wn)
+TransferFunctionCoeffs butter_hp(size_t order, double Wn)
 {
     auto poles = analog_proto_poles(order);
     const double wc = 2.0 * std::tan(std::numbers::pi * Wn / 2.0);
@@ -102,13 +100,14 @@ TransferFunctionCoeffs butter_hp(int order, double Wn)
         p = wc / p; // LP→HP: s → wc/s
 
     std::vector<std::complex<double>> z_poles(order), z_zeros(order, {1.0, 0.0});
-    for (int i = 0; i < order; ++i)
+    for (size_t i = 0; i < order; ++i) {
         z_poles[i] = bilinear(poles[i]);
+    }
 
     return make_coeffs(z_zeros, z_poles, {-1.0, 0.0}); // normalize Nyquist gain to 1
 }
 
-TransferFunctionCoeffs butter_bp(int order, double Wn1, double Wn2)
+TransferFunctionCoeffs butter_bp(size_t order, double Wn1, double Wn2)
 {
     auto proto = analog_proto_poles(order);
     const double w1 = 2.0 * std::tan(std::numbers::pi * Wn1 / 2.0);
@@ -128,10 +127,12 @@ TransferFunctionCoeffs butter_bp(int order, double Wn1, double Wn2)
 
     // N zeros at z=+1 (ω=0) and N zeros at z=-1 (ω=π)
     std::vector<std::complex<double>> z_zeros(2 * order);
-    for (int i = 0; i < order; ++i)
+    for (size_t i = 0; i < order; ++i) {
         z_zeros[i] = {1.0, 0.0};
-    for (int i = order; i < 2 * order; ++i)
+    }
+    for (size_t i = order; i < 2 * order; ++i) {
         z_zeros[i] = {-1.0, 0.0};
+    }
 
     // Normalize at the bilinear-transformed analog center frequency
     const std::complex<double> s_center = {0.0, w0};
@@ -139,7 +140,7 @@ TransferFunctionCoeffs butter_bp(int order, double Wn1, double Wn2)
     return make_coeffs(z_zeros, z_poles, z_center);
 }
 
-TransferFunctionCoeffs butter_bs(int order, double Wn1, double Wn2)
+TransferFunctionCoeffs butter_bs(size_t order, double Wn1, double Wn2)
 {
     auto proto = analog_proto_poles(order);
     const double w1 = 2.0 * std::tan(std::numbers::pi * Wn1 / 2.0);
@@ -162,7 +163,7 @@ TransferFunctionCoeffs butter_bs(int order, double Wn1, double Wn2)
     const auto z_notch = bilinear({0.0, w0});
     std::vector<std::complex<double>> z_zeros;
     z_zeros.reserve(2 * order);
-    for (int i = 0; i < order; ++i) {
+    for (size_t i = 0; i < order; ++i) {
         z_zeros.push_back(z_notch);
         z_zeros.push_back(std::conj(z_notch));
     }
@@ -186,17 +187,18 @@ std::vector<double> poly_mul(const std::vector<double>& p, const std::vector<dou
 TransferFunctionCoeffs butter(int order, const FilterType::V& filter)
 {
     assert(order >= 1);
+    const auto N = sucast(order);
     return std::visit(
-      [order](auto&& f) -> TransferFunctionCoeffs {
+      [N](auto&& f) -> TransferFunctionCoeffs {
           using T = std::decay_t<decltype(f)>;
           if constexpr (std::is_same_v<T, FilterType::LowPass>)
-              return butter_lp(order, f.cutoff);
+              return butter_lp(N, f.cutoff);
           else if constexpr (std::is_same_v<T, FilterType::HighPass>)
-              return butter_hp(order, f.cutoff);
+              return butter_hp(N, f.cutoff);
           else if constexpr (std::is_same_v<T, FilterType::BandPass>)
-              return butter_bp(order, f.low_cutoff, f.high_cutoff);
+              return butter_bp(N, f.low_cutoff, f.high_cutoff);
           else
-              return butter_bs(order, f.low_cutoff, f.high_cutoff);
+              return butter_bs(N, f.low_cutoff, f.high_cutoff);
       },
       filter
     );
@@ -217,19 +219,18 @@ bilinear(std::span<const double> b, std::span<const double> a, double fs, std::o
     const double lam =
       fp.has_value() ? 2.0 * std::numbers::pi * fp.value() / std::tan(std::numbers::pi * fp.value() / fs) : 2.0 * fs;
 
-    const int nb = static_cast<int>(b.size());
-    const int na = static_cast<int>(a.size());
-    const int n = std::max(nb, na) - 1; // filter order
+    assert(!b.empty() && !a.empty());
+    const size_t n = std::max(b.size(), a.size()) - 1; // filter order
 
     // Pad numerator and denominator to the same order n (prepend zeros).
     std::vector<double> bp(n + 1, 0.0), ap(n + 1, 0.0);
-    std::copy(b.begin(), b.end(), bp.begin() + (n + 1 - nb));
-    std::copy(a.begin(), a.end(), ap.begin() + (n + 1 - na));
+    std::copy_backward(b.begin(), b.end(), bp.end());
+    std::copy_backward(a.begin(), a.end(), ap.end());
 
     // Precompute (z-1)^k and (z+1)^k for k = 0..n.
     std::vector<std::vector<double>> zm1(n + 1), zp1(n + 1);
     zm1[0] = zp1[0] = {1.0};
-    for (int k = 1; k <= n; ++k) {
+    for (size_t k = 1; k <= n; ++k) {
         zm1[k] = poly_mul(zm1[k - 1], {1.0, -1.0});
         zp1[k] = poly_mul(zp1[k - 1], {1.0, 1.0});
     }
@@ -239,10 +240,10 @@ bilinear(std::span<const double> b, std::span<const double> a, double fs, std::o
     auto transform = [&](const std::vector<double>& p) {
         std::vector<double> result(n + 1, 0.0);
         double lam_k = 1.0;
-        for (int k = 0; k <= n; ++k) {
+        for (size_t k = 0; k <= n; ++k) {
             const auto term = poly_mul(zm1[k], zp1[n - k]);
             const double coeff = p[n - k] * lam_k;
-            for (int i = 0; i <= n; ++i) {
+            for (size_t i = 0; i <= n; ++i) {
                 result[i] += coeff * term[i];
             }
             lam_k *= lam;

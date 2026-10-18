@@ -10,7 +10,7 @@
 }
 #endif
 
-expected<FILE*, errno_t> try_fopen(const char* filename, const char* mode)
+expected<FILE*, int> try_fopen(const char* filename, const char* mode)
 {
 #ifdef _MSC_VER
     FILE* f{};

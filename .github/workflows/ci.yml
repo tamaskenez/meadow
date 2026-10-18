@@ -21,10 +21,14 @@ jobs:
     strategy:
       matrix:
         include:
-          - os: macos-latest
+          - os: macos-26
             cmake_generator: -G Xcode
-          - os: windows-latest
+          - os: windows-2025
             cmake_generator: ""
+          - os: ubuntu-26.04
+            cmake_generator: ""
+            # GCC 15 (the default) lacks <mdspan>.
+            gcc_version: 16
 
     env:
       BUILD_TYPE: ${{ inputs.build_type || 'Debug' }}
@@ -32,12 +36,21 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
+      - name: Install GCC ${{ matrix.gcc_version }}
+        if: matrix.gcc_version
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y g++-${{ matrix.gcc_version }}
+          echo "CC=gcc-${{ matrix.gcc_version }}" >> "$GITHUB_ENV"
+          echo "CXX=g++-${{ matrix.gcc_version }}" >> "$GITHUB_ENV"
+          g++-${{ matrix.gcc_version }} --version
+
       - name: Cache Conan packages
         id: conan-cache
         uses: actions/cache@v5
         with:
           path: id
-          key: conan-${{ matrix.os }}-${{ hashFiles('conanfile.txt') }}
+          key: conan-${{ matrix.os }}${{ matrix.gcc_version && format('-gcc{0}', matrix.gcc_version) || '' }}-${{ hashFiles('conanfile.txt', '1_build_conan.sh', 'conan/**') }}
 
       - name: Install Conan
         if: steps.conan-cache.outputs.cache-hit != 'true'
@@ -49,7 +62,7 @@ jobs:
         run: ./1_build_conan.sh --use-deployer
 
       - name: Configure
-        run: cmake -S . -B _b ${{ matrix.cmake_generator }}
+        run: cmake -S . -B _b ${{ matrix.cmake_generator }} -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }}
 
       - name: Build
         run: cmake --build _b --config ${{ env.BUILD_TYPE }}

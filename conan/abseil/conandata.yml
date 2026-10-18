@@ -1,0 +1,9 @@
+# Local abseil recipe: conanfile.py is an unchanged copy of conan-center-index
+# recipes/abseil/all (1c90a5cb2e6353488efefa7d16020c19f9fae0c5), building an abseil-cpp master snapshot.
+# Reason: 20260526.0 includes <bmi2intrin.h> directly, which GCC rejects when __BMI2__ is defined
+# (https://github.com/abseil/abseil-cpp/issues/2094). Fixed on master by d851fdd768b2.
+# Remove this recipe once a fixed abseil release is on Conan Center.
+sources:
+  "20261017.0-git.017286b":
+    url: "https://github.com/abseil/abseil-cpp/archive/017286b60b65c303f4a5cbdefdc6541b1e9b42b4.tar.gz"
+    sha256: "e98230f57161c36f315438967645fcedb5c80440f023ac498835226ac95f212c"

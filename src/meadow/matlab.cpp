@@ -140,7 +140,8 @@ array<T, 2> polyfit1(span<const T> xs, span<const T> ys)
         sy += y;
         sxy += x * y;
     }
-    auto det = ifcast<T>(N) * sx2 - square(sx);
+    const auto N_T = ifcast<T>(N);
+    auto det = N_T * sx2 - square(sx);
     // [sx2 -sx
     //  -sx  N] / det
     //
@@ -149,7 +150,7 @@ array<T, 2> polyfit1(span<const T> xs, span<const T> ys)
     //
     // beta = [sx2 * sy + sx * sxy
     //         sx * sy + N * sxy] / det
-    return array<T, 2>{(N * sxy - sx * sy) / det, (sx2 * sy - sx * sxy) / det};
+    return array<T, 2>{(N_T * sxy - sx * sy) / det, (sx2 * sy - sx * sxy) / det};
 }
 
 template array<float, 2> polyfit1(span<const float> xs, span<const float> ys);
