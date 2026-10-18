@@ -96,6 +96,20 @@ using std::unordered_set;
 using std::variant;
 using std::vector;
 using std::weak_ptr;
+
+// Without these, glibc's global C functions (double only) would be called for float arguments.
+using std::abs;
+using std::ceil;
+using std::cos;
+using std::exp;
+using std::floor;
+using std::log;
+using std::log10;
+using std::log2;
+using std::pow;
+using std::round;
+using std::sin;
+using std::sqrt;
 #endif
 
 #define BEGIN_END(X) std::begin(X), std::end(X)
