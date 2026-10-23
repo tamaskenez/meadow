@@ -146,8 +146,8 @@ auto interp1(X&& x, V&& v, XQ xq) -> std::decay_t<decltype(*std::begin(v))>
     assert(j >= 1);
     const auto i = j - 1;
 
-    const auto xi = *(std::begin(x) + i);
-    const auto xj = *(std::begin(x) + j);
+    const auto xi = static_cast<XQ>(*(std::begin(x) + i));
+    const auto xj = static_cast<XQ>(*(std::begin(x) + j));
     return std::lerp(*(std::begin(v) + i), *(std::begin(v) + j), (xq - xi) / (xj - xi));
 }
 
