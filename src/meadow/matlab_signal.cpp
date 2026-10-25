@@ -1,10 +1,15 @@
 #include "meadow/matlab_signal.h"
+#include "meadow/math.h"
 #include "meadow/matlab.h"
 
 #include <cassert>
 #include <cmath>
 #include <complex>
 #include <numbers>
+
+#if MEADOW_HAS_CYL_BESSEL_I == 0 && MEADOW_HAS_BOOST == 1
+  #include <boost/math/special_functions/bessel.hpp>
+#endif
 
 namespace matlab
 {
@@ -183,6 +188,101 @@ std::vector<double> poly_mul(const std::vector<double>& p, const std::vector<dou
 }
 
 } // namespace
+
+double rectwin_fn(int n, int L)
+{
+    return 0 <= n && n < L ? 1.0 : 0.0;
+}
+
+std::vector<double> blackman(int L)
+{
+    vector<double> w(sucast(L));
+    const double c0 = 2 * num::pi / (L - 1);
+    const double c1 = 4 * num::pi / (L - 1);
+    for (auto n : vi_iota<int>(0, L)) {
+        w[sucast(n)] = 0.42 - 0.5 * cos(c0 * n) + 0.08 * cos(c1 * n);
+    }
+    return w;
+}
+
+double blackman_fn(int n, int L)
+{
+    if (n < 0 || L <= n) {
+        return 0.0;
+    }
+    return 0.42 - 0.5 * cos(2 * num::pi * n / (L - 1)) + 0.08 * cos(4 * num::pi * n / (L - 1));
+}
+
+vector<double> gausswin(int L, double alpha)
+{
+    CHECK(L >= 0);
+    vector<double> w(sucast(L));
+    const double center = (ifcast<double>(L) - 1) / 2;
+    for (int n = 0; n < L; ++n) {
+        const double dn = n - center;
+        w[sucast(n)] = exp(-0.5 * square(alpha * dn / center));
+    }
+    return w;
+}
+
+double gausswin_fn(int n, int L, double alpha)
+{
+    if (n < 0 || L <= n) {
+        return 0.0;
+    }
+    const double center = (ifcast<double>(L) - 1) / 2;
+    const double dn = n - center;
+    return exp(-0.5 * square(alpha * dn / center));
+}
+
+#if MEADOW_HAS_CYL_BESSEL_I == 1 || MEADOW_HAS_BOOST == 1
+double kaiser_fn(int n, int L, double beta)
+{
+    if (n < 0 || L <= n) {
+        return 0.0;
+    }
+    const double N_over_2 = (double(L) - 1) / 2;
+
+  #if MEADOW_HAS_CYL_BESSEL_I == 1
+    using std::cyl_bessel_i;
+  #else
+    using boost::math::cyl_bessel_i;
+  #endif
+
+    return cyl_bessel_i(0.0, beta * sqrt(1 - square((n - N_over_2) / N_over_2))) / cyl_bessel_i(0.0, beta);
+}
+#endif
+
+double hann_poisson_fn(int n, int L, double alpha)
+{
+    if (n < 0 || L <= n) {
+        return 0.0;
+    }
+    const double N = L - 1;
+    return 0.5 * (1 - cos(2 * num::pi * n / N)) * exp(-alpha * abs(N - 2 * n) / N);
+}
+
+namespace detail
+{
+// From https://github.com/boostorg/math/blob/develop/include/boost/math/special_functions/sinc.hpp, Boost 1.91.0
+inline double sinc_pi(double x)
+{
+    constexpr double fourth_root_epsilon = 0.0001220703125;
+    if (std::isinf(x)) {
+        return 0;
+    } else if (abs(x) >= 3.3 * fourth_root_epsilon) {
+        return sin(x) / x;
+    } else {
+        // |x| < (eps*120)^(1/4)
+        return 1 - x * x / 6;
+    }
+}
+} // namespace detail
+
+double sinc(double x)
+{
+    return detail::sinc_pi(x * num::pi);
+}
 
 TransferFunctionCoeffs butter(int order, const FilterType::V& filter)
 {

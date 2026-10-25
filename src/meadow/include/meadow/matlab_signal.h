@@ -1,7 +1,9 @@
 #pragma once
 
 #include <cassert>
+#include <cmath>
 #include <complex>
+#include <concepts>
 #include <optional>
 #include <span>
 #include <variant>
@@ -9,6 +11,49 @@
 
 namespace matlab
 {
+
+template<class T>
+    requires std::floating_point<T>
+T mag2db(T x)
+{
+    assert(x >= 0);
+    return x <= 0 ? static_cast<T>(-INFINITY) : static_cast<T>(20) * log10(x);
+}
+
+template<class T>
+    requires std::floating_point<T>
+T pow2db(T x)
+{
+    assert(x >= 0);
+    return x <= 0 ? static_cast<T>(-INFINITY) : static_cast<T>(10) * log10(x);
+}
+
+template<class T>
+    requires std::floating_point<T>
+T db2mag(T x)
+{
+    return pow(static_cast<T>(10), x / 20);
+}
+
+template<class T>
+    requires std::floating_point<T>
+T db2pow(T x)
+{
+    return pow(static_cast<T>(10), x / 10);
+}
+
+double rectwin_fn(int n, int L);
+double blackman_fn(int n, int L);
+double gausswin_fn(int n, int L, double alpha);
+double hann_poisson_fn(int n, int L, double alpha);
+#if MEADOW_HAS_CYL_BESSEL_I == 1 || MEADOW_HAS_BOOST == 1
+double kaiser_fn(int n, int L, double beta);
+#endif
+
+std::vector<double> blackman(int L);
+std::vector<double> gausswin(int L, double alpha);
+
+double sinc(double x);
 
 namespace FilterType
 {

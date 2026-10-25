@@ -28,36 +28,6 @@ public:
 namespace matlab
 {
 template<class T>
-    requires std::floating_point<T>
-T mag2db(T x)
-{
-    assert(x >= 0);
-    return x <= 0 ? static_cast<T>(-INFINITY) : static_cast<T>(20) * log10(x);
-}
-
-template<class T>
-    requires std::floating_point<T>
-T pow2db(T x)
-{
-    assert(x >= 0);
-    return x <= 0 ? static_cast<T>(-INFINITY) : static_cast<T>(10) * log10(x);
-}
-
-template<class T>
-    requires std::floating_point<T>
-T db2mag(T x)
-{
-    return pow(static_cast<T>(10), x / 20);
-}
-
-template<class T>
-    requires std::floating_point<T>
-T db2pow(T x)
-{
-    return pow(static_cast<T>(10), x / 10);
-}
-
-template<class T>
     requires std::floating_point<T> || std::integral<T>
 constexpr auto rad2deg(T x)
 {
@@ -151,17 +121,6 @@ auto interp1(X&& x, V&& v, XQ xq) -> std::decay_t<decltype(*std::begin(v))>
     return std::lerp(*(std::begin(v) + i), *(std::begin(v) + j), (xq - xi) / (xj - xi));
 }
 
-double rectwin_fn(int n, int L);
-double blackman_fn(int n, int L);
-double gausswin_fn(int n, int L, double alpha);
-double hann_poisson_fn(int n, int L, double alpha);
-#if MEADOW_HAS_CYL_BESSEL_I == 1 || MEADOW_HAS_BOOST == 1
-double kaiser_fn(int n, int L, double beta);
-#endif
-
-std::vector<double> blackman(int L);
-std::vector<double> gausswin(int L, double alpha);
-
 template<class T>
 constexpr T nextpow2(T x)
 {
@@ -231,19 +190,10 @@ std::vector<double> polyfit(
 std::vector<double> linspace(double x1, double x2, size_t n);
 std::vector<double> logspace(double e1, double e2, size_t n);
 
-double sinc(double x);
-
 double datenum(std::chrono::local_days d);
 // Invalid dates are undefined behavior (asserted on ymd.ok()).
 double datenum(std::chrono::year_month_day ymd);
 double datenum(int y, int m, int d);
-
-// Return Pearson's Linear Correlation Coefficient:
-//     xs2 = xs - mean(xs);
-//     ys2 = ys - mean(ys);
-//     sum(xs2 .* ys2) / sqrt(sum(xs2.^2) * sum(ys2.^2))
-// Precond: xs and ys have the same, non-zero size. Return NaN if either input is constant.
-double corr(span<const double> xs, span<const double> ys);
 
 // Return 2 x 2 covariance matrix.
 //     [var(xs)       cov(xs, ys)

@@ -3,6 +3,7 @@
 #include "meadow/cppext.h"
 #include "meadow/math.h"
 #include "meadow/matlab.h"
+#include "meadow/matlab_signal.h"
 
 #include <gtest/gtest.h>
 #include <magic_enum/magic_enum.hpp>

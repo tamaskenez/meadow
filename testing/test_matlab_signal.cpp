@@ -1,5 +1,7 @@
 #include "matlab_butter_test_data.h"
+#include "meadow/math.h"
 #include "meadow/matlab_signal.h"
+#include "meadow/span.h"
 
 #include <gtest/gtest.h>
 
@@ -356,4 +358,237 @@ TEST(matlab_signal, bilinear_order2_prewarp)
     constexpr double eps = 1e-14;
     expect_near(r.b, {2.67223550176609592199e-07, 5.34447100131174579474e-07, 2.67223550287631894662e-07}, eps);
     expect_near(r.a, {1.00000000000000000000e+00, -1.99853734787105885573e+00, 9.98538416765259451147e-01}, eps);
+}
+
+TEST(matlab_signal, mag2db)
+{
+    EXPECT_DOUBLE_EQ(matlab::mag2db(0.0), -INFINITY);
+    EXPECT_DOUBLE_EQ(matlab::mag2db(1.0), 0.0);
+    EXPECT_DOUBLE_EQ(matlab::mag2db(10.0), 20.0);
+}
+
+TEST(matlab_signal, pow2db)
+{
+    EXPECT_DOUBLE_EQ(matlab::pow2db(0.0), -INFINITY);
+    EXPECT_DOUBLE_EQ(matlab::pow2db(1.0), 0.0);
+    EXPECT_DOUBLE_EQ(matlab::pow2db(10.0), 10.0);
+}
+
+TEST(matlab_signal, db2mag)
+{
+    EXPECT_DOUBLE_EQ(matlab::db2mag(0.0), 1.0);
+    EXPECT_DOUBLE_EQ(matlab::db2mag(20.0), 10.0);
+}
+
+TEST(matlab_signal, db2pow)
+{
+    EXPECT_DOUBLE_EQ(matlab::db2pow(0.0), 1.0);
+    EXPECT_DOUBLE_EQ(matlab::db2pow(10.0), 10.0);
+}
+
+namespace
+{
+template<class Fn>
+vector<double> make_win(size_t N, Fn&& fn)
+{
+    EXPECT_EQ(fn(-1), 0.0);
+    EXPECT_EQ(fn(iicast<int>(N)), 0.0);
+    vector<double> xs(N);
+    for (size_t i : vi::iota(0u, N)) {
+        xs[i] = fn(iicast<int>(i));
+    }
+    return xs;
+}
+} // namespace
+
+TEST(matlab_signal, rectwin_fn)
+{
+    auto r7 = make_win(7, [](int n) {
+        return matlab::rectwin_fn(n, 7);
+    });
+    auto r8 = make_win(8, [](int n) {
+        return matlab::rectwin_fn(n, 8);
+    });
+    EXPECT_EQ(r7, vector<double>({1, 1, 1, 1, 1, 1, 1}));
+    EXPECT_EQ(r8, vector<double>({1, 1, 1, 1, 1, 1, 1, 1}));
+}
+
+TEST(matlab_signal, blackman_fn)
+{
+    auto r7 = make_win(7, [](int n) {
+        return matlab::blackman_fn(n, 7);
+    });
+    auto r8 = make_win(8, [](int n) {
+        return matlab::blackman_fn(n, 8);
+    });
+
+    expect_near(
+      r7,
+      vector<double>(
+        {-1.387778780781446e-17,
+         1.299999999999999e-01,
+         6.299999999999999e-01,
+         9.999999999999999e-01,
+         6.300000000000002e-01,
+         1.299999999999999e-01,
+         -1.387778780781446e-17}
+      ),
+      DBL_EPSILON
+    );
+    expect_near(
+      r8,
+      vector<double>(
+        {-1.387778780781446e-17,
+         9.045342435412804e-02,
+         4.591829575459636e-01,
+         9.203636180999081e-01,
+         9.203636180999083e-01,
+         4.591829575459638e-01,
+         9.045342435412812e-02,
+         -1.387778780781446e-17}
+      ),
+      DBL_EPSILON
+    );
+}
+
+TEST(matlab_signal, gausswin_fn)
+{
+    auto r7 = make_win(7, [](int n) {
+        return matlab::gausswin_fn(n, 7, 3.0);
+    });
+    auto r8 = make_win(8, [](int n) {
+        return matlab::gausswin_fn(n, 8, 4.0);
+    });
+
+    expect_near(
+      r7,
+      vector<double>(
+        {1.110899653824231e-02,
+         1.353352832366127e-01,
+         6.065306597126334e-01,
+         1.000000000000000e+00,
+         6.065306597126334e-01,
+         1.353352832366127e-01,
+         1.110899653824231e-02}
+      ),
+      DBL_EPSILON
+    );
+    expect_near(
+      r8,
+      vector<double>(
+        {3.354626279025119e-04,
+         1.687988414878993e-02,
+         2.300662989938091e-01,
+         8.493658165683124e-01,
+         8.493658165683124e-01,
+         2.300662989938091e-01,
+         1.687988414878993e-02,
+         3.354626279025119e-04}
+      ),
+      DBL_EPSILON
+    );
+}
+
+#if MEADOW_HAS_CYL_BESSEL_I == 1 || MEADOW_HAS_BOOST == 1
+TEST(matlab_signal, kaiser_fn)
+{
+    auto r7 = make_win(7, [](int n) {
+        return matlab::kaiser_fn(n, 7, 1.23);
+    });
+    auto r8 = make_win(8, [](int n) {
+        return matlab::kaiser_fn(n, 8, 1.78);
+    });
+
+    expect_near(
+      r7,
+      vector<double>(
+        {0.706450386180156,
+         0.862875634246974,
+         0.964683201523233,
+         1.000000000000000,
+         0.964683201523233,
+         0.862875634246974,
+         0.706450386180156}
+      ),
+      1e-15
+    );
+    expect_near(
+      r8,
+      vector<double>(
+        {0.509303391023423,
+         0.726907890745535,
+         0.895844495440142,
+         0.988089123045320,
+         0.988089123045320,
+         0.895844495440142,
+         0.726907890745535,
+         0.509303391023423}
+      ),
+      1e-15
+    );
+}
+#endif
+
+TEST(matlab_signal, hann_poisson_fn)
+{
+    auto r7 = make_win(7, [](int n) {
+        return matlab::hann_poisson_fn(n, 7, 2.1);
+    });
+    auto r8 = make_win(8, [](int n) {
+        return matlab::hann_poisson_fn(n, 8, 2.9);
+    });
+
+    expect_near(
+      r7,
+      vector<double>(
+        {0, 0.061649240985402, 0.372438977843557, 1.000000000000000, 0.372438977843557, 0.061649240985402, 0}
+      ),
+      1e-15
+    );
+    expect_near(
+      r8,
+      vector<double>(
+        {0,
+         0.023721205183369,
+         0.176384455982313,
+         0.628091634613610,
+         0.628091634613610,
+         0.176384455982313,
+         0.023721205183369,
+         0}
+      ),
+      1e-15
+    );
+}
+
+TEST(matlab_signal, sinc)
+{
+    // Expected values for x = 10^i, i in [-10, -1] (sinc well away from zero)
+    constexpr array k_expected = {
+      1.000000000000000e+00,
+      1.000000000000000e+00,
+      9.999999999999998e-01,
+      9.999999999999835e-01,
+      9.999999999983551e-01,
+      9.999999998355066e-01,
+      9.999999835506593e-01,
+      9.999983550667449e-01,
+      9.998355147105485e-01,
+      9.836316430834660e-01
+    };
+
+    static_assert(k_expected.size() == 10);
+    ASSERT_EQ(matlab::sinc(0.0), 1.0);
+    ASSERT_EQ(matlab::sinc(INFINITY), 0.0);
+    ASSERT_EQ(matlab::sinc(-INFINITY), 0.0);
+    for (int i = -10; i <= -1; ++i) {
+        const auto x = pow(10, i);
+        const auto actual = matlab::sinc(x);
+        const auto expected = k_expected[sucast(i + 10)];
+        ASSERT_LE(abs(log(actual / expected)), 1e-14);
+    }
+    // For integer x >= 1, sinc(x) = sin(pi*x)/(pi*x) is within floating-point noise of zero
+    for (int i = 0; i <= 10; ++i) {
+        ASSERT_LE(abs(matlab::sinc(pow(10, i))), 1e-15);
+    }
 }
