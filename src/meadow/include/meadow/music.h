@@ -7,14 +7,14 @@ template<class T>
     requires std::is_floating_point_v<T>
 T ratio2semitones(T ratio)
 {
-    return 12 * log2(ratio);
+    return 12 * std::log2(ratio);
 }
 
 template<class T>
     requires std::is_floating_point_v<T>
 T semitones2ratio(T semitones)
 {
-    return pow(T(2), semitones / 12);
+    return std::exp2(semitones / 12);
 }
 
 template<class T>

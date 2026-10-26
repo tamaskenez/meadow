@@ -172,6 +172,34 @@ auto switch_variant(Variant&& variant, Ts&&... ts)
     return std::visit(overloaded{std::forward<Ts>(ts)...}, std::forward<Variant>(variant));
 }
 
+// Iterates over indices [0, size).
+// Use it like this:
+//     for(auto k: indices_of(vec)) { ...
+auto indices_of(const auto& r)
+{
+    const auto s = std::ranges::size(r);
+    constexpr decltype(s) zero{};
+    return std::views::iota(zero, s);
+}
+
+// std::views::enumerate backport
+#if !defined(__cpp_lib_ranges_enumerate)
+namespace std::ranges::views
+{
+template<class R>
+auto enumerate(R&& r)
+{
+    // Like std::views::enumerate, the index is range_difference_t and the result is sized if R is.
+    using D = std::ranges::range_difference_t<R>;
+    if constexpr (std::ranges::sized_range<R>) {
+        return std::views::zip(std::views::iota(D{0}, static_cast<D>(std::ranges::size(r))), std::forward<R>(r));
+    } else {
+        return std::views::zip(std::views::iota(D{0}), std::forward<R>(r));
+    }
+}
+} // namespace std::ranges::views
+#endif
+
 template<class R, class T>
     requires std::integral<R> && std::floating_point<T>
 constexpr R ifloor(T x)

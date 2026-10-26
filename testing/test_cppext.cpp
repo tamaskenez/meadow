@@ -151,3 +151,136 @@ TEST(cppext, PP_STRINGIZE)
     static_assert(std::string_view(MEADOW_PP_STRINGIZE(PP_STRINGIZE_TEST_A)) == "hello");
 #undef PP_STRINGIZE_TEST_A
 }
+
+TEST(cppext, indices_of)
+{
+    const vector<int> xs = {10, 20, 30};
+    static_assert(std::is_same_v<ra::range_value_t<decltype(indices_of(xs))>, size_t>);
+    vector<size_t> ks;
+    for (auto k : indices_of(xs)) {
+        ks.push_back(k);
+    }
+    EXPECT_EQ(ks, (vector<size_t>{0, 1, 2}));
+    EXPECT_EQ(ra::size(indices_of(xs)), xs.size());
+
+    // Empty range.
+    EXPECT_TRUE(indices_of(vector<int>{}).empty());
+
+    // Index type follows the range's size type.
+    const auto iv = vi::iota(5, 8);
+    using iv_size_t = decltype(ra::size(iv));
+    static_assert(std::is_same_v<ra::range_value_t<decltype(indices_of(iv))>, iv_size_t>);
+    EXPECT_TRUE(ra::equal(indices_of(iv), vector<iv_size_t>{0, 1, 2}));
+
+    // Other sized ranges.
+    constexpr std::array<int, 4> arr{};
+    EXPECT_EQ(ra::size(indices_of(arr)), 4u);
+    int c_arr[2] = {};
+    EXPECT_EQ(ra::size(indices_of(c_arr)), 2u);
+    EXPECT_EQ(ra::size(indices_of(std::span(xs).subspan(1))), 2u);
+}
+
+TEST(cppext, enumerate)
+{
+    vector<string> xs = {"a", "b", "c"};
+    vector<pair<size_t, string>> result;
+    for (auto [i, x] : vi::enumerate(xs)) {
+        result.emplace_back(iicast<size_t>(i), x);
+    }
+    EXPECT_EQ(
+      result,
+      (vector<pair<size_t, string>>{
+        {0, "a"},
+        {1, "b"},
+        {2, "c"}
+    })
+    );
+
+    // Elements are references into the underlying range.
+    for (auto [i, x] : vi::enumerate(xs)) {
+        x += std::to_string(i);
+    }
+    EXPECT_EQ(xs, (vector<string>{"a0", "b1", "c2"}));
+
+    // Const range.
+    const vector<int> cxs = {5, 6};
+    for (auto [i, x] : vi::enumerate(cxs)) {
+        static_assert(std::is_same_v<decltype(x), const int&>);
+        EXPECT_EQ(x, cxs[iicast<size_t>(i)]);
+    }
+
+    // Empty range.
+    EXPECT_TRUE(vi::enumerate(vector<int>{}).empty());
+
+    // Rvalue range is owned by the view.
+    auto owning = vi::enumerate(vector<int>{7, 8, 9});
+    int sum = 0;
+    for (auto [i, x] : owning) {
+        sum += iicast<int>(i) * x;
+    }
+    EXPECT_EQ(sum, 0 * 7 + 1 * 8 + 2 * 9);
+
+    // Composes with other views.
+    auto evens = vi::enumerate(vector<int>{3, 4, 5, 6}) | vi::filter([](const auto& p) {
+                     return std::get<0>(p) % 2 == 0;
+                 })
+               | vi::transform([](const auto& p) {
+                     return std::get<1>(p);
+                 });
+    EXPECT_TRUE(ra::equal(evens, vector<int>{3, 5}));
+}
+
+TEST(cppext, enumerate_index_type)
+{
+    // Index is the range's difference type, as in std::views::enumerate.
+    vector<int> xs = {1, 2};
+    using E = decltype(vi::enumerate(xs));
+    static_assert(std::is_same_v<std::tuple_element_t<0, ra::range_value_t<E>>, ptrdiff_t>);
+    static_assert(std::is_same_v<std::tuple_element_t<0, ra::range_reference_t<E>>, ptrdiff_t>);
+
+    using E8 = decltype(vi::enumerate(vi::iota(int8_t{0}, int8_t{3})));
+    static_assert(std::is_same_v<
+                  std::tuple_element_t<0, ra::range_value_t<E8>>,
+                  ra::range_difference_t<decltype(vi::iota(int8_t{0}, int8_t{3}))>>);
+}
+
+TEST(cppext, enumerate_sized_common)
+{
+    vector<int> xs = {7, 8, 9};
+    auto e = vi::enumerate(xs);
+    static_assert(ra::sized_range<decltype(e)>);
+    static_assert(ra::common_range<decltype(e)>);
+    static_assert(ra::random_access_range<decltype(e)>);
+    EXPECT_EQ(ra::size(e), xs.size());
+    EXPECT_EQ(ra::size(vi::enumerate(vector<int>{})), 0u);
+
+    // Common range: usable with iterator-pair constructors.
+    const vector<std::tuple<ptrdiff_t, int>> v(e.begin(), e.end());
+    EXPECT_EQ(
+      v,
+      (vector<std::tuple<ptrdiff_t, int>>{
+        {0, 7},
+        {1, 8},
+        {2, 9}
+    })
+    );
+    EXPECT_EQ(std::get<0>(*(e.end() - 1)), 2);
+
+    // Unsized ranges still work.
+    auto filtered = xs | vi::filter([](int x) {
+                        return x != 8;
+                    });
+    auto ef = vi::enumerate(filtered);
+    static_assert(!ra::sized_range<decltype(ef)>);
+    vector<pair<ptrdiff_t, int>> result;
+    for (auto [i, x] : ef) {
+        result.emplace_back(i, x);
+    }
+    EXPECT_EQ(
+      result,
+      (vector<pair<ptrdiff_t, int>>{
+        {0, 7},
+        {1, 9}
+    })
+    );
+}
