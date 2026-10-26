@@ -52,6 +52,10 @@ double kaiser_fn(int n, int L, double beta);
 
 std::vector<double> blackman(int L);
 std::vector<double> gausswin(int L, double alpha);
+std::vector<double> hann_poisson(int L, double alpha);
+#if MEADOW_HAS_CYL_BESSEL_I == 1 || MEADOW_HAS_BOOST == 1
+std::vector<double> kaiser(int L, double beta);
+#endif
 
 double sinc(double x);
 

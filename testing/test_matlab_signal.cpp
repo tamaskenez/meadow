@@ -527,6 +527,16 @@ TEST(matlab_signal, kaiser_fn)
       1e-15
     );
 }
+
+TEST(matlab_signal, kaiser)
+{
+    for (int L : {7, 8}) {
+        auto expected = make_win(sucast(L), [L](int n) {
+            return matlab::kaiser_fn(n, L, 1.78);
+        });
+        expect_near(matlab::kaiser(L, 1.78), expected, 1e-15);
+    }
+}
 #endif
 
 TEST(matlab_signal, hann_poisson_fn)
@@ -559,6 +569,16 @@ TEST(matlab_signal, hann_poisson_fn)
       ),
       1e-15
     );
+}
+
+TEST(matlab_signal, hann_poisson)
+{
+    for (int L : {7, 8}) {
+        auto expected = make_win(sucast(L), [L](int n) {
+            return matlab::hann_poisson_fn(n, L, 2.9);
+        });
+        expect_near(matlab::hann_poisson(L, 2.9), expected, 1e-15);
+    }
 }
 
 TEST(matlab_signal, sinc)

@@ -251,6 +251,23 @@ double kaiser_fn(int n, int L, double beta)
 
     return cyl_bessel_i(0.0, beta * sqrt(1 - square((n - N_over_2) / N_over_2))) / cyl_bessel_i(0.0, beta);
 }
+
+vector<double> kaiser(int L, double beta)
+{
+    CHECK(L >= 0);
+  #if MEADOW_HAS_CYL_BESSEL_I == 1
+    using std::cyl_bessel_i;
+  #else
+    using boost::math::cyl_bessel_i;
+  #endif
+    vector<double> w(sucast(L));
+    const double N_over_2 = (double(L) - 1) / 2;
+    const double denom = cyl_bessel_i(0.0, beta);
+    for (int n = 0; n < L; ++n) {
+        w[sucast(n)] = cyl_bessel_i(0.0, beta * sqrt(1 - square((n - N_over_2) / N_over_2))) / denom;
+    }
+    return w;
+}
 #endif
 
 double hann_poisson_fn(int n, int L, double alpha)
@@ -260,6 +277,17 @@ double hann_poisson_fn(int n, int L, double alpha)
     }
     const double N = L - 1;
     return 0.5 * (1 - cos(2 * num::pi * n / N)) * exp(-alpha * abs(N - 2 * n) / N);
+}
+
+vector<double> hann_poisson(int L, double alpha)
+{
+    CHECK(L >= 0);
+    vector<double> w(sucast(L));
+    const double N = L - 1;
+    for (int n = 0; n < L; ++n) {
+        w[sucast(n)] = 0.5 * (1 - cos(2 * num::pi * n / N)) * exp(-alpha * abs(N - 2 * n) / N);
+    }
+    return w;
 }
 
 namespace detail
