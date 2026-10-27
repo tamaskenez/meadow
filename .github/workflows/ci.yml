@@ -69,3 +69,12 @@ jobs:
 
       - name: Test
         run: ctest --test-dir _b -C ${{ env.BUILD_TYPE }} --output-on-failure
+
+      - name: Benchmark PowerFilterBank lanes
+        shell: bash
+        run: |
+          # ctest doesn't run disabled tests, but it knows the path of the executable for any generator and config.
+          exe=$(ctest --test-dir _b -C $BUILD_TYPE -R '^PowerFilterBank\.benchmark_lanes$' --show-only=json-v1 \
+            | jq -r '.tests[0].command[0]')
+          echo "Test executable: $exe"
+          "$exe" --gtest_also_run_disabled_tests --gtest_filter=PowerFilterBank.DISABLED_benchmark_lanes
