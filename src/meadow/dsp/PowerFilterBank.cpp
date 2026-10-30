@@ -36,8 +36,18 @@ PowerFilterBank<IOFloat, ProcFloat>::PowerFilterBank(
   double lpf_freq_ratio_arg,
   double max_lpf_freq_hz_arg
 )
-    : lpf_freq_ratio(lpf_freq_ratio_arg)
-    , max_lpf_freq_hz(max_lpf_freq_hz_arg)
+    : PowerFilterBank(lo_freq_hz, hi_freq_hz, bands_per_octave, bp_filter_order, Q)
+{
+    lpf_freq_ratio = lpf_freq_ratio_arg;
+    max_lpf_freq_hz = max_lpf_freq_hz_arg;
+    CHECK(lpf_freq_ratio > 0) << format("PowerFilterBank: invalid lpf_freq_ratio: {}", lpf_freq_ratio);
+    CHECK(max_lpf_freq_hz > 0) << format("PowerFilterBank: invalid max_lpf_freq_hz: {}", max_lpf_freq_hz);
+}
+
+template<class IOFloat, class ProcFloat>
+PowerFilterBank<IOFloat, ProcFloat>::PowerFilterBank(
+  double lo_freq_hz, double hi_freq_hz, double bands_per_octave, int bp_filter_order, double Q
+)
 {
     CHECK(0 < lo_freq_hz && lo_freq_hz <= hi_freq_hz)
       << format("PowerFilterBank: invalid frequency range: lo = {} Hz, hi = {} Hz", lo_freq_hz, hi_freq_hz);
@@ -48,8 +58,6 @@ PowerFilterBank<IOFloat, ProcFloat>::PowerFilterBank(
       k_max_bp_filter_order
     );
     CHECK(Q > 0.5) << format("PowerFilterBank: invalid Q: {}, must be > 0.5", Q);
-    CHECK(lpf_freq_ratio > 0) << format("PowerFilterBank: invalid lpf_freq_ratio: {}", lpf_freq_ratio);
-    CHECK(max_lpf_freq_hz > 0) << format("PowerFilterBank: invalid max_lpf_freq_hz: {}", max_lpf_freq_hz);
 
     const auto num_bands =
       iicast<size_t>(ifloor<int>(std::log2(hi_freq_hz / lo_freq_hz) * bands_per_octave + 1e-9)) + 1;
@@ -122,6 +130,9 @@ void PowerFilterBank<IOFloat, ProcFloat>::prepare_to_play(double sample_rate_arg
             s.h = ffcast<ProcFloat>(1.0 / (1.0 + as.R2 * g + g * g));
         }
         b.power_gain = ffcast<ProcFloat>(analog_power_gain);
+        if (std::isnan(lpf_freq_ratio)) {
+            continue;
+        }
         const auto lpf_freq = std::min({f / lpf_freq_ratio, max_lpf_freq_hz, k_max_lpf_freq_fs_ratio * sample_rate});
         const auto g = std::tan(num::pi * lpf_freq / sample_rate);
         b.lpf_G = ffcast<ProcFloat>(g / (1.0 + g));
@@ -222,6 +233,7 @@ void PowerFilterBank<IOFloat, ProcFloat>::process_bands(std::span<const IOFloat>
     array<SectionLanes, NS> sections;
     array<ProcFloat, Lanes> power_gain{}, lpf_G{}, lpf_s{}, power{};
     const auto num_lanes = std::min(Lanes, num_active_bands - first_band);
+    const bool has_lpf = !std::isnan(lpf_freq_ratio);
     for (size_t l = 0; l < num_lanes; ++l) {
         const auto& b = bands[first_band + l];
         for (size_t i = 0; i < NS; ++i) {
@@ -238,8 +250,9 @@ void PowerFilterBank<IOFloat, ProcFloat>::process_bands(std::span<const IOFloat>
         lpf_s[l] = b.lpf_s;
     }
 
+    // The output of the bandpasses.
+    array<ProcFloat, Lanes> x;
     for (const auto x_in : samples) {
-        array<ProcFloat, Lanes> x;
         x.fill(ffcast<ProcFloat>(x_in));
         for (auto& sl : sections) {
             for (size_t l = 0; l < Lanes; ++l) {
@@ -251,10 +264,18 @@ void PowerFilterBank<IOFloat, ProcFloat>::process_bands(std::span<const IOFloat>
                 x[l] = y_bp;
             }
         }
+        if (has_lpf) {
+            for (size_t l = 0; l < Lanes; ++l) {
+                const auto v = (power_gain[l] * x[l] * x[l] - lpf_s[l]) * lpf_G[l];
+                power[l] = v + lpf_s[l];
+                lpf_s[l] = power[l] + v;
+            }
+        }
+    }
+    if (!has_lpf) {
+        // `samples` is not empty, see process_block().
         for (size_t l = 0; l < Lanes; ++l) {
-            const auto v = (power_gain[l] * x[l] * x[l] - lpf_s[l]) * lpf_G[l];
-            power[l] = v + lpf_s[l];
-            lpf_s[l] = power[l] + v;
+            power[l] = power_gain[l] * x[l] * x[l];
         }
     }
 

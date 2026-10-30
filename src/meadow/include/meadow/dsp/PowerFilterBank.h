@@ -5,7 +5,7 @@
 #include <span>
 
 // Bank of logarithmically spaced bandpass filters, each followed by squaring and a 1st order low-pass, yielding a
-// running power estimate per band.
+// running power estimate per band. The low-pass is optional.
 //
 // Each bandpass is a Butterworth bandpass of order `bp_filter_order` (the lowpass-to-bandpass transform of a
 // Butterworth lowpass of order bp_filter_order/2), implemented as a cascade of TPT state-variable filter sections and
@@ -35,6 +35,9 @@ public:
       double lpf_freq_ratio,
       double max_lpf_freq_hz
     );
+    // Without the power low-pass: band_powers() is the squared (and normalized) output of the bandpasses after the
+    // most recent sample. Allocates.
+    PowerFilterBank(double lo_freq_hz, double hi_freq_hz, double bands_per_octave, int bp_filter_order, double Q);
 
     // Q of a bandpass whose -3 dB band edges are the geometric midpoints between adjacent band frequencies.
     NODIS static double Q_for_bands_per_octave(double bands_per_octave);
@@ -98,6 +101,7 @@ private:
         array<Section, k_max_sections> sections;
     };
 
+    // NAN if there's no power low-pass.
     double lpf_freq_ratio = NAN;
     double max_lpf_freq_hz = NAN;
     size_t num_sections = 0;

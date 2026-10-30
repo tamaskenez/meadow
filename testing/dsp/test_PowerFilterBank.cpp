@@ -142,6 +142,26 @@ TEST(PowerFilterBank, bands_near_nyquist_are_inactive)
     EXPECT_EQ(powers[5], 0.0); // 32 kHz, above Nyquist
 }
 
+// Without the low-pass, the powers of the real and imaginary parts of a complex exponential (two banks) add up to its
+// squared amplitude, sample by sample.
+TEST(PowerFilterBank, no_lpf_complex_exponential_has_constant_power)
+{
+    const double f0 = 1000, amplitude = 0.5;
+    PowerFilterBank<double> re_bank(f0, f0, 1, 4, 10), im_bank(f0, f0, 1, 4, 10);
+    re_bank.prepare_to_play(k_sample_rate);
+    im_bank.prepare_to_play(k_sample_rate);
+    for (size_t n = 0; n < 48000; ++n) {
+        const auto phase = 2 * num::pi * f0 * ifcast<double>(n) / k_sample_rate;
+        const array<double, 1> re{amplitude * std::cos(phase)}, im{amplitude * std::sin(phase)};
+        re_bank.process_block(re);
+        im_bank.process_block(im);
+        if (n >= 24000) {
+            ASSERT_NEAR(re_bank.band_powers()[0] + im_bank.band_powers()[0], amplitude * amplitude, 1e-6)
+              << format("n = {}", n);
+        }
+    }
+}
+
 // The processing of each number of lanes must match the scalar processing (1 lane).
 TEST(PowerFilterBank, lanes_match_scalar)
 {
