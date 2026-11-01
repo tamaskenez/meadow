@@ -1,9 +1,13 @@
 #!/bin/bash -e
 
+# Arguments other than --use-deployer are forwarded to `conan install`, e.g. `-s os.version=11.0`.
 use_deployer=0
+extra_args=()
 for arg in "$@"; do
 	if [[ "$arg" == "--use-deployer" ]]; then
 		use_deployer=1
+	else
+		extra_args+=("$arg")
 	fi
 done
 
@@ -32,5 +36,6 @@ for build_type in Debug Release; do
 		-of id/cmake \
 		"${deployer_flags[@]}" \
 		-s build_type=${build_type} \
-		-s compiler.cppstd=${cppstd}
+		-s compiler.cppstd=${cppstd} \
+		"${extra_args[@]}"
 done

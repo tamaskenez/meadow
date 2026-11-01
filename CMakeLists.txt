@@ -50,6 +50,7 @@ set(dependencies
     SDL_MIXER
     BOOST
     MAGIC_ENUM
+    FMT
 )
 
 set(ABSL_PACKAGE_NAME absl)
@@ -62,6 +63,8 @@ set(SDL_MIXER_PACKAGE_NAME SDL3_mixer)
 set(SDL_MIXER_TARGET SDL3_mixer::SDL3_mixer)
 set(BOOST_PACKAGE_NAME Boost)
 set(MAGIC_ENUM_PACKAGE_NAME magic_enum)
+set(FMT_PACKAGE_NAME fmt)
+set(FMT_TARGET fmt::fmt)
 
 foreach(dependency IN LISTS dependencies)
     set(MEADOW_WITH_${dependency} ${dependency_default_requirement} CACHE STRING "Build with ${dependency}")

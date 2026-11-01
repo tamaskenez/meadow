@@ -55,7 +55,7 @@ template<class T>
 {
     return detail::saveAscii_core(path, [&](FILE* f) {
         for (auto x : xs) {
-            std::println(f, "{}", x);
+            println(f, "{}", x);
         }
     });
 }
@@ -67,9 +67,9 @@ template<class T>
     return detail::saveAscii_core(path, [&](FILE* f) {
         for (size_t r = 0; r < mr.rows; ++r) {
             for (size_t c = 0; c < mr.cols; ++c) {
-                std::print(f, "{} ", mr.atFn(r, c));
+                print(f, "{} ", mr.atFn(r, c));
             }
-            std::println(f);
+            println(f);
         }
     });
 }
