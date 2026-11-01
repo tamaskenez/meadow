@@ -26,6 +26,11 @@ jobs:
           - os: macos-26
             cmake_generator: -G Xcode
             osx_deployment_target: "11.0"
+          # Cross-compiled on the arm64 runner, the tests run under Rosetta.
+          - os: macos-26
+            cmake_generator: -G Xcode
+            osx_deployment_target: "10.15"
+            osx_arch: x86_64
           - os: windows-2025
             cmake_generator: ""
           - os: ubuntu-26.04
@@ -35,8 +40,12 @@ jobs:
 
     env:
       BUILD_TYPE: ${{ inputs.build_type || 'Debug' }}
-      CONAN_EXTRA_ARGS: ${{ matrix.osx_deployment_target && format('-s os.version={0}', matrix.osx_deployment_target) || '' }}
-      CMAKE_EXTRA_ARGS: ${{ matrix.osx_deployment_target && format('-DCMAKE_OSX_DEPLOYMENT_TARGET={0}', matrix.osx_deployment_target) || '' }}
+      CONAN_EXTRA_ARGS: >-
+        ${{ matrix.osx_deployment_target && format('-s os.version={0}', matrix.osx_deployment_target) || '' }}
+        ${{ matrix.osx_arch && format('-s arch={0}', matrix.osx_arch) || '' }}
+      CMAKE_EXTRA_ARGS: >-
+        ${{ matrix.osx_deployment_target && format('-DCMAKE_OSX_DEPLOYMENT_TARGET={0}', matrix.osx_deployment_target) || '' }}
+        ${{ matrix.osx_arch && format('-DCMAKE_OSX_ARCHITECTURES={0}', matrix.osx_arch) || '' }}
 
     steps:
       - uses: actions/checkout@v6
@@ -55,7 +64,7 @@ jobs:
         uses: actions/cache@v5
         with:
           path: id
-          key: conan-${{ matrix.os }}${{ matrix.gcc_version && format('-gcc{0}', matrix.gcc_version) || '' }}${{ matrix.osx_deployment_target && format('-osx{0}', matrix.osx_deployment_target) || '' }}-${{ hashFiles('conanfile.txt', '1_build_conan.sh', 'conan/**') }}
+          key: conan-${{ matrix.os }}${{ matrix.gcc_version && format('-gcc{0}', matrix.gcc_version) || '' }}${{ matrix.osx_deployment_target && format('-osx{0}', matrix.osx_deployment_target) || '' }}${{ matrix.osx_arch && format('-{0}', matrix.osx_arch) || '' }}-${{ hashFiles('conanfile.txt', '1_build_conan.sh', 'conan/**') }}
 
       - name: Install Conan
         if: steps.conan-cache.outputs.cache-hit != 'true'
