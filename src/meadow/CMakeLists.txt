@@ -1,6 +1,19 @@
 include(CheckCXXSymbolExists)
 check_cxx_symbol_exists(cyl_bessel_i cmath HAVE_CYL_BESSEL_I)
 
+# Compile and link, so the check also fails if the deployment target's standard library lacks them (e.g. libc++ before
+# macOS 13.3).
+include(CheckCXXSourceCompiles)
+check_cxx_source_compiles("
+#include <format>
+#include <print>
+int main()
+{
+    std::print(\"{}\", std::format(\"{}\", 1.5));
+    std::println(\"{}\", 1);
+}
+" HAVE_STD_FORMAT_AND_PRINT)
+
 file(GLOB_RECURSE sources CONFIGURE_DEPENDS *.h *.cpp)
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${sources})
 
@@ -64,6 +77,18 @@ if(MEADOW_HAS_MAGIC_ENUM)
     )
     get_target_property(v magic_enum::magic_enum SYSTEM)
     message(STATUS "magic_enum::magic_enum SYSTEM property is: \"${v}\"")
+endif()
+
+if(HAVE_STD_FORMAT_AND_PRINT)
+    target_compile_definitions(meadow PUBLIC MEADOW_HAS_STD_FORMAT_AND_PRINT=1)
+else()
+    if(NOT MEADOW_HAS_FMT)
+        message(FATAL_ERROR "std::format/std::print are not available for this target and meadow is built without fmt")
+    endif()
+    target_compile_definitions(meadow PUBLIC MEADOW_HAS_STD_FORMAT_AND_PRINT=0)
+    target_link_libraries(meadow PUBLIC
+        fmt::fmt
+    )
 endif()
 
 foreach(dependency IN LISTS dependencies)

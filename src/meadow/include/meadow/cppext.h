@@ -1,5 +1,9 @@
 #pragma once
 
+#if MEADOW_HAS_STD_FORMAT_AND_PRINT==0
+#include "compat.h"
+#endif
+
 #include "detail/float_to_int_cast_core.h"
 
 #if MEADOW_HAS_ABSL == 1
@@ -68,7 +72,6 @@ using std::cmp_not_equal;
 using std::default_random_engine;
 using std::deque;
 using std::expected;
-using std::format;
 using std::function;
 using std::holds_alternative;
 using std::initializer_list;
@@ -79,8 +82,6 @@ using std::monostate;
 using std::nullopt;
 using std::optional;
 using std::pair;
-using std::print;
-using std::println;
 using std::shared_ptr;
 using std::span;
 using std::string;
@@ -96,6 +97,16 @@ using std::unordered_set;
 using std::variant;
 using std::vector;
 using std::weak_ptr;
+
+#if MEADOW_HAS_STD_FORMAT_AND_PRINT
+using std::format;
+using std::print;
+using std::println;
+#else
+using compat::format;
+using compat::print;
+using compat::println;
+#endif
 
 // Without these, glibc's global C functions (double only) would be called for float arguments.
 using std::abs;
