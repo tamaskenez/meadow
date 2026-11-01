@@ -1,7 +1,7 @@
 #pragma once
 
-#if MEADOW_HAS_STD_FORMAT_AND_PRINT==0
-#include "compat.h"
+#if MEADOW_HAS_STD_FORMAT_AND_PRINT == 0
+  #include "compat.h"
 #endif
 
 #include "detail/float_to_int_cast_core.h"
@@ -98,15 +98,15 @@ using std::variant;
 using std::vector;
 using std::weak_ptr;
 
-#if MEADOW_HAS_STD_FORMAT_AND_PRINT
+  #if MEADOW_HAS_STD_FORMAT_AND_PRINT
 using std::format;
 using std::print;
 using std::println;
-#else
+  #else
 using compat::format;
 using compat::print;
 using compat::println;
-#endif
+  #endif
 
 // Without these, glibc's global C functions (double only) would be called for float arguments.
 using std::abs;

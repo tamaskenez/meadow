@@ -13,6 +13,18 @@ int main()
     std::println(\"{}\", 1);
 }
 " HAVE_STD_FORMAT_AND_PRINT)
+# Same for the floating-point overloads of std::from_chars (e.g. libc++ before macOS 26.0).
+check_cxx_source_compiles("
+#include <charconv>
+int main()
+{
+    const char s[] = \"1.5\";
+    float f;
+    double d;
+    std::from_chars(s, s + 3, f);
+    std::from_chars(s, s + 3, d);
+}
+" HAVE_STD_FROM_CHARS_FLOATING_POINT)
 
 file(GLOB_RECURSE sources CONFIGURE_DEPENDS *.h *.cpp)
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${sources})
@@ -89,6 +101,12 @@ else()
     target_link_libraries(meadow PUBLIC
         fmt::fmt
     )
+endif()
+
+if(HAVE_STD_FROM_CHARS_FLOATING_POINT)
+    target_compile_definitions(meadow PUBLIC MEADOW_HAS_STD_FROM_CHARS_FLOATING_POINT=1)
+else()
+    target_compile_definitions(meadow PUBLIC MEADOW_HAS_STD_FROM_CHARS_FLOATING_POINT=0)
 endif()
 
 foreach(dependency IN LISTS dependencies)

@@ -2,6 +2,7 @@
 
 #include <gtest/gtest.h>
 
+#include <chrono>
 #include <cstdio>
 #include <string>
 
@@ -20,5 +21,23 @@ TEST(compat, print)
     compat::println("{}", 2.5);
     compat::print(stdout, "{}", "x");
     compat::println(stdout, "{}", 'y');
-    EXPECT_EQ(testing::internal::GetCapturedStdout(), "1-2.5\nxy\n");
+    compat::println();
+    compat::println(stdout);
+    EXPECT_EQ(testing::internal::GetCapturedStdout(), "1-2.5\nxy\n\n\n");
 }
+
+namespace test_compat_adl
+{
+using compat::format;
+using compat::println;
+
+// With std-typed arguments ADL would also find std::format (<chrono> includes it), which must not be selected when
+// std::format is not available.
+TEST(compat, unqualified_call_with_std_arguments)
+{
+    EXPECT_EQ(format("{} {}", std::string("a"), 1.5), "a 1.5");
+    testing::internal::CaptureStdout();
+    println("{}", std::string("b"));
+    EXPECT_EQ(testing::internal::GetCapturedStdout(), "b\n");
+}
+} // namespace test_compat_adl

@@ -23,6 +23,9 @@ jobs:
         include:
           - os: macos-26
             cmake_generator: -G Xcode
+          - os: macos-26
+            cmake_generator: -G Xcode
+            osx_deployment_target: "11.0"
           - os: windows-2025
             cmake_generator: ""
           - os: ubuntu-26.04
@@ -32,6 +35,8 @@ jobs:
 
     env:
       BUILD_TYPE: ${{ inputs.build_type || 'Debug' }}
+      CONAN_EXTRA_ARGS: ${{ matrix.osx_deployment_target && format('-s os.version={0}', matrix.osx_deployment_target) || '' }}
+      CMAKE_EXTRA_ARGS: ${{ matrix.osx_deployment_target && format('-DCMAKE_OSX_DEPLOYMENT_TARGET={0}', matrix.osx_deployment_target) || '' }}
 
     steps:
       - uses: actions/checkout@v6
@@ -50,7 +55,7 @@ jobs:
         uses: actions/cache@v5
         with:
           path: id
-          key: conan-${{ matrix.os }}${{ matrix.gcc_version && format('-gcc{0}', matrix.gcc_version) || '' }}-${{ hashFiles('conanfile.txt', '1_build_conan.sh', 'conan/**') }}
+          key: conan-${{ matrix.os }}${{ matrix.gcc_version && format('-gcc{0}', matrix.gcc_version) || '' }}${{ matrix.osx_deployment_target && format('-osx{0}', matrix.osx_deployment_target) || '' }}-${{ hashFiles('conanfile.txt', '1_build_conan.sh', 'conan/**') }}
 
       - name: Install Conan
         if: steps.conan-cache.outputs.cache-hit != 'true'
@@ -59,10 +64,10 @@ jobs:
       - name: Build Conan dependencies
         if: steps.conan-cache.outputs.cache-hit != 'true'
         shell: bash
-        run: ./1_build_conan.sh --use-deployer
+        run: ./1_build_conan.sh --use-deployer $CONAN_EXTRA_ARGS
 
       - name: Configure
-        run: cmake -S . -B _b ${{ matrix.cmake_generator }} -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }}
+        run: cmake -S . -B _b ${{ matrix.cmake_generator }} -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} ${{ env.CMAKE_EXTRA_ARGS }}
 
       - name: Build
         run: cmake --build _b --config ${{ env.BUILD_TYPE }}

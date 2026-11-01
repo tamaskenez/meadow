@@ -34,8 +34,10 @@ TEST(string, expected_from_all_chars_other_types)
     static_assert(std::is_same_v<decltype(expected_from_all_chars<double>("")), std::expected<double, std::errc>>);
     static_assert(std::is_same_v<decltype(expected_from_all_chars<int64_t>("")), std::expected<int64_t, std::errc>>);
 
+#if MEADOW_HAS_STD_FROM_CHARS_FLOATING_POINT
     EXPECT_EQ(expected_from_all_chars<double>("1.5"), 1.5);
     EXPECT_EQ(expected_from_all_chars<double>("-2.25e2"), -225.0);
+#endif
     EXPECT_EQ(expected_from_all_chars<int64_t>("10000000000"), 10000000000);
     EXPECT_EQ(expected_from_all_chars<uint8_t>("255"), 255);
     EXPECT_EQ(expected_from_all_chars<uint8_t>("256"), std::unexpected(std::errc::result_out_of_range));
