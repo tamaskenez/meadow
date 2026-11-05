@@ -26,8 +26,14 @@ int main()
 }
 " HAVE_STD_FROM_CHARS_FLOATING_POINT)
 
-file(GLOB_RECURSE sources CONFIGURE_DEPENDS *.h *.cpp)
-source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${sources})
+file(GLOB_RECURSE all_sources CONFIGURE_DEPENDS *.h *.cpp)
+source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${all_sources})
+
+# Test files live next to the sources they test: *_test.cpp, *_test_*.h, ...
+set(test_filename_regex "/[^/]*_test[_.][^/]*$")
+
+set(sources ${all_sources})
+list(FILTER sources EXCLUDE REGEX "${test_filename_regex}")
 
 if(NOT MEADOW_HAS_SDL)
     list(FILTER sources EXCLUDE REGEX "/sdl.*$")
@@ -116,3 +122,25 @@ foreach(dependency IN LISTS dependencies)
         target_compile_definitions(meadow PUBLIC MEADOW_HAS_${dependency}=0)
     endif()
 endforeach()
+
+if(BUILD_TESTING)
+    if(NOT TARGET magic_enum::magic_enum)
+        find_package(magic_enum REQUIRED CONFIG)
+    endif()
+
+    set(test_sources ${all_sources})
+    list(FILTER test_sources INCLUDE REGEX "${test_filename_regex}")
+
+    add_executable(test_meadow ${test_sources})
+    target_precompile_headers(test_meadow
+        PRIVATE pch_test.h
+    )
+    target_link_libraries(test_meadow PRIVATE
+        meadow
+        GTest::gtest
+        GTest::gtest_main
+        magic_enum::magic_enum
+    )
+    include(GoogleTest)
+    gtest_discover_tests(test_meadow)
+endif()
